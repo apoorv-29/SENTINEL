@@ -145,11 +145,5 @@ pip install -r requirements.txt
 6. Start the application
 
 Use the appropriate startup command for the implemented backend and frontend.
-
-👥 Team Structure
-
-
-
 🔐 Security & Responsible Usage
-
 SENTINEL is intended for authorized security assessment and defensive security research
