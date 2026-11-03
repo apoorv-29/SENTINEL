@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-slate-950" style="color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SENTINEL – Zero-Trust API Security & Phishing Intelligence Platform</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.glow-indigo{box-shadow:0 0 20px rgba(99,102,241,.2)}
+.glass{background:rgba(15,23,42,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+/* Scroll reveal: hidden only when JS is running (class "js" is set on <html>) */
+.js [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);transition-delay:var(--d,0ms)}
+.js [data-reveal="left"]{transform:translateX(-28px)}
+.js [data-reveal="zoom"]{transform:scale(.94)}
+.js [data-reveal].in{opacity:1;transform:none}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#6366f1,#22d3ee);z-index:60}
+.tab{display:none}.tab.active{display:block}
+.navbtn.active{background:rgba(99,102,241,.1);color:#818cf8;border-color:rgba(99,102,241,.25)}
+.bar{transition:width 1s cubic-bezier(.16,1,.3,1)}
+@media (prefers-reduced-motion:reduce){.js [data-reveal]{transition:none;opacity:1;transform:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body class="text-slate-100 antialiased min-h-screen flex flex-col">
+<div id="progress"></div>
+<div id="toasts" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none flex flex-col items-end"></div>
+
+<header class="glass border-b border-slate-800 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 p-2 rounded-xl glow-indigo"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
+      <div>
+        <h1 class="text-lg font-bold text-white flex items-center gap-2">SENTINEL <span class="text-[10px] px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/30">Zero-Trust v1.0</span></h1>
+        <p class="text-xs text-slate-400 hidden sm:block">API Security &amp; Phishing Intelligence Platform</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="hidden md:flex items-center bg-slate-950 px-3 py-1.5 rounded-xl text-xs text-slate-300 gap-2 border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>Engine: <strong class="text-emerald-400">Local demo mode</strong>
+      </div>
+      <button onclick="globalScan()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 glow-indigo"><i data-lucide="zap" class="w-3.5 h-3.5"></i>Run Deep Scan</button>
+    </div>
+  </div>
+</header>
+
+<div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+  <aside class="lg:col-span-1">
+    <nav class="glass p-3 rounded-2xl border border-slate-800 space-y-1 lg:sticky lg:top-24" data-reveal="left">
+      <button data-tab="overview" class="navbtn active w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="layout-dashboard" class="w-4 h-4"></i>Threat Overview</button>
+      <button data-tab="repo" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="file-code" class="w-4 h-4"></i>Repository Scanner</button>
+      <button data-tab="api" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="server" class="w-4 h-4"></i>API Analyzer</button>
+      <button data-tab="phish" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="fish" class="w-4 h-4"></i>Phishing Intel</button>
+      <button data-tab="graph" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="network" class="w-4 h-4"></i>Trust Graph</button>
+    </nav>
+  </aside>
+
+  <main class="lg:col-span-3">
+    <!-- OVERVIEW -->
+    <section id="tab-overview" class="tab active space-y-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div data-reveal style="--d:0ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Threats blocked</p><p id="k-blocked" class="text-2xl font-bold text-rose-400 mt-1">0</p></div>
+        <div data-reveal style="--d:100ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Secrets found</p><p id="k-secrets" class="text-2xl font-bold text-amber-400 mt-1">0</p></div>
+        <div data-reveal style="--d:200ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">APIs at risk</p><p id="k-apis" class="text-2xl font-bold text-indigo-400 mt-1">0</p></div>
+        <div data-reveal style="--d:300ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Phish URLs flagged</p><p id="k-phish" class="text-2xl font-bold text-emerald-400 mt-1">0</p></div>
+      </div>
+      <div data-reveal="zoom" class="glass border border-slate-800 rounded-2xl p-5">
+        <h2 class="text-sm font-semibold mb-4">Threat categories (last 24h)</h2>
+        <div id="cats" class="space-y-3"></div>
+      </div>
+      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
+        <h2 class="text-sm font-semibold mb-3">Live event feed</h2>
+        <ul id="feed" class="space-y-2 text-xs text-slate-300 max-h-64 overflow-y-auto"></ul>
+      </div>
+    </section>
+
+    <!-- REPO SCANNER -->
+    <section id="tab-repo" class="tab space-y-4">
+      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
+        <h2 class="text-sm font-semibold mb-1">Repository Scanner</h2>
+        <p class="text-xs text-slate-400 mb-3">Paste code or config. Scanning runs locally in your browser.</p>
+        <textarea id="repo-in" rows="9" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Paste code here..."></textarea>
+        <div class="flex gap-2 mt-3">
+          <button onclick="scanRepo()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Scan code</button>
+          <button onclick="sampleRepo()" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-2 rounded-xl">Load sample</button>
+        </div>
+      </div>
+      <div id="repo-out" data-reveal class="glass border border-slate-800 rounded-2xl p-5 text-xs text-slate-400">No scan yet.</div>
+    </section>
+
+    <!-- API ANALYZER -->
+    <section id="tab-api" class="tab space-y-4">
+      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold">API Analyzer – zero-trust posture</h2>
+          <button onclick="scanApis()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Re-analyze</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="text-slate-400"><tr><th class="py-2 pr-3">Endpoint</th><th class="pr-3">Auth</th><th class="pr-3">TLS</th><th class="pr-3">Rate limit</th><th class="pr-3">Risk</th></tr></thead>
+            <tbody id="api-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHISHING -->
+    <section id="tab-phish" class="tab space-y-4">
+      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
+        <h2 class="text-sm font-semibold mb-1">Phishing URL Intelligence</h2>
+        <p class="text-xs text-slate-400 mb-3">Heuristic analysis of the URL structure only. Nothing is fetched.</p>
+        <div class="flex gap-2">
+          <input id="url-in" type="text" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="http://paypa1-secure-login.example.com/verify@account">
+          <button onclick="checkUrl()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Analyze</button>
+        </div>
+      </div>
+      <div id="url-out" data-reveal class="glass border border-slate-800 rounded-2xl p-5 text-xs text-slate-400">Enter a URL to analyze.</div>
+    </section>
+
+    <!-- GRAPH -->
+    <section id="tab-graph" class="tab">
+      <div data-reveal="zoom" class="glass border border-slate-800 rounded-2xl p-5">
+        <h2 class="text-sm font-semibold mb-3">Zero-Trust request graph</h2>
+        <div id="graph" class="w-full h-96 bg-slate-950 rounded-xl border border-slate-800"></div>
+        <p id="graph-msg" class="text-xs text-slate-500 mt-2"></p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500" data-reveal>SENTINEL demo · all analysis runs locally in your browser</footer>
+
+<script>
+document.documentElement.classList.add('js');
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {} };
+
+/* ---------- Scroll animation ---------- */
+let io = null;
+function observeReveals(root) {
+  const els = (root || document).querySelectorAll('[data-reveal]:not(.in)');
+  if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
+  if (!io) io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  els.forEach((e) => io.observe(e));
+}
+function onScroll() {
+  const h = document.documentElement;
+  const max = h.scrollHeight - h.clientHeight;
+  $('progress').style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+}
+addEventListener('scroll', onScroll, { passive: true });
+
+/* ---------- Toasts ---------- */
+function toast(msg, color) {
+  const t = document.createElement('div');
+  t.className = 'pointer-events-auto glass border border-slate-700 text-xs px-4 py-2.5 rounded-xl shadow-xl transition-all duration-300 opacity-0 translate-y-2 ' + (color || 'text-slate-100');
+  t.textContent = msg;
+  $('toasts').appendChild(t);
+  requestAnimationFrame(() => t.classList.remove('opacity-0', 'translate-y-2'));
+  setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+/* ---------- Tabs ---------- */
+let graphNet = null;
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.id === 'tab-' + name));
+  document.querySelectorAll('.navbtn').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+  const sec = $('tab-' + name);
+  sec.querySelectorAll('[data-reveal]').forEach((e) => e.classList.remove('in'));
+  observeReveals(sec);
+  if (name === 'graph') drawGraph();
+  if (name === 'overview') animateBars();
+  scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.navbtn').forEach((b) => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+/* ---------- Overview ---------- */
+const state = { blocked: 1284, secrets: 0, apis: 0, phish: 0 };
+const cats = [['Credential stuffing', 72, 'bg-rose-500'], ['Phishing links', 58, 'bg-amber-500'], ['Broken auth (BOLA)', 41, 'bg-indigo-500'], ['Leaked secrets', 29, 'bg-cyan-500'], ['Rate-limit abuse', 17, 'bg-emerald-500']];
+function renderCats() {
+  $('cats').innerHTML = cats.map((c) => '<div><div class="flex justify-between text-xs mb-1"><span>' + c[0] + '</span><span class="text-slate-400">' + c[1] + '%</span></div><div class="h-2 bg-slate-800 rounded-full overflow-hidden"><div class="bar h-full ' + c[2] + ' rounded-full" data-w="' + c[1] + '" style="width:0"></div></div></div>').join('');
+}
+function animateBars() { setTimeout(() => document.querySelectorAll('.bar').forEach((b) => { b.style.width = b.dataset.w + '%'; }), 150); }
+function countTo(id, to) {
+  const el = $(id), from = parseInt(el.textContent.replace(/,/g, ''), 10) || 0, t0 = performance.now();
+  (function step(t) {
+    const p = Math.min((t - t0) / 900, 1);
+    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))).toLocaleString();
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+function refreshKpis() { countTo('k-blocked', state.blocked); countTo('k-secrets', state.secrets); countTo('k-apis', state.apis); countTo('k-phish', state.phish); }
+function log(msg, tone) {
+  const li = document.createElement('li');
+  li.className = 'flex gap-2 items-start border-l-2 pl-3 py-1 ' + (tone === 'bad' ? 'border-rose-500' : tone === 'warn' ? 'border-amber-500' : 'border-emerald-500');
+  li.innerHTML = '<span class="text-slate-500 shrink-0">' + new Date().toLocaleTimeString() + '</span><span>' + esc(msg) + '</span>';
+  $('feed').prepend(li);
+}
+
+/* ---------- Repository scanner ---------- */
+const rules = [
+  ['AWS access key', /AKIA[0-9A-Z]{16}/g, 'high'],
+  ['Private key block', /-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/g, 'high'],
+  ['Hard-coded API key / token', /(?:api[_-]?key|secret|token)\s*[:=]\s*["'][A-Za-z0-9_\-]{12,}["']/gi, 'high'],
+  ['Hard-coded password', /password\s*[:=]\s*["'][^"']{4,}["']/gi, 'high'],
+  ['JWT token', /eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g, 'med'],
+  ['Use of eval()', /\beval\s*\(/g, 'med'],
+  ['Insecure http:// URL', /http:\/\/(?!localhost|127\.0\.0\.1)[^\s"']+/g, 'low']
+];
+function sampleRepo() {
+  $('repo-in').value = 'const api_key = "sk_live_51H8abcdEFGH1234";\nconst password = "admin123";\naws = "AKIAIOSFODNN7EXAMPLE";\nfetch("http://api.example.com/users");\neval(userInput);\n';
+}
+function scanRepo() {
+  const code = $('repo-in').value;
+  if (!code.trim()) { toast('Paste some code first', 'text-amber-400'); return; }
+  const found = [];
+  code.split('\n').forEach((line, i) => rules.forEach((r) => { r[1].lastIndex = 0; if (r[1].test(line)) found.push({ n: i + 1, name: r[0], sev: r[2], line: line.trim().slice(0, 80) }); }));
+  const col = { high: 'text-rose-400', med: 'text-amber-400', low: 'text-sky-400' };
+  $('repo-out').innerHTML = found.length
+    ? '<p class="text-sm font-semibold text-white mb-3">' + found.length + ' issue(s) found</p>' + found.map((f) => '<div class="border border-slate-800 rounded-xl p-3 mb-2"><span class="font-semibold ' + col[f.sev] + '">' + f.sev.toUpperCase() + '</span> · ' + esc(f.name) + ' <span class="text-slate-500">(line ' + f.n + ')</span><pre class="mt-1 text-slate-400 overflow-x-auto">' + esc(f.line) + '</pre></div>').join('')
+    : '<p class="text-emerald-400 font-semibold">No issues detected.</p>';
+  state.secrets += found.length; refreshKpis();
+  log('Repo scan finished: ' + found.length + ' issue(s)', found.length ? 'warn' : 'ok');
+  toast('Scan complete: ' + found.length + ' issue(s)');
+}
+
+/* ---------- API analyzer ---------- */
+const endpoints = [
+  { p: 'GET /v1/users/{id}', auth: true, tls: true, rl: true },
+  { p: 'POST /v1/login', auth: false, tls: true, rl: false },
+  { p: 'GET /v1/admin/export', auth: false, tls: true, rl: false },
+  { p: 'PUT /v1/orders/{id}', auth: true, tls: true, rl: false },
+  { p: 'GET /health', auth: false, tls: false, rl: true }
+];
+function scanApis() {
+  let risky = 0;
+  $('api-rows').innerHTML = endpoints.map((e) => {
+    const s = (e.auth ? 0 : 3) + (e.tls ? 0 : 2) + (e.rl ? 0 : 1);
+    const lvl = s >= 4 ? ['Critical', 'text-rose-400'] : s >= 2 ? ['Medium', 'text-amber-400'] : ['Low', 'text-emerald-400'];
+    if (s >= 2) risky++;
+    const y = (v) => v ? '<span class="text-emerald-400">Yes</span>' : '<span class="text-rose-400">No</span>';
+    return '<tr class="border-t border-slate-800"><td class="py-2.5 pr-3 font-mono">' + e.p + '</td><td>' + y(e.auth) + '</td><td>' + y(e.tls) + '</td><td>' + y(e.rl) + '</td><td class="font-semibold ' + lvl[1] + '">' + lvl[0] + '</td></tr>';
+  }).join('');
+  state.apis = risky; refreshKpis();
+  log('API analysis: ' + risky + ' endpoint(s) need attention', risky ? 'warn' : 'ok');
+}
+
+/* ---------- Phishing ---------- */
+function checkUrl() {
+  const raw = $('url-in').value.trim();
+  if (!raw) { toast('Enter a URL', 'text-amber-400'); return; }
+  let u;
+  try { u = new URL(/^[a-z]+:\/\//i.test(raw) ? raw : 'http://' + raw); } catch (e) { toast('That does not look like a valid URL', 'text-rose-400'); return; }
+  const host = u.hostname, flags = [];
+  const add = (c, pts, msg) => { if (c) flags.push([pts, msg]); };
+  add(u.protocol !== 'https:', 20, 'Not using HTTPS');
+  add(/^\d{1,3}(\.\d{1,3}){3}$/.test(host), 30, 'IP address used instead of a domain');
+  add(raw.includes('@'), 25, 'Contains @ (can hide the real destination)');
+  add(host.split('.').length > 4, 15, 'Too many subdomains');
+  add(raw.length > 75, 10, 'Very long URL');
+  add(host.includes('xn--'), 25, 'Punycode (look-alike characters)');
+  add((host.match(/-/g) || []).length >= 2, 10, 'Many hyphens in the domain');
+  add(/(login|verify|secure|account|update|bank|wallet|password)/i.test(raw), 15, 'Sensitive keywords in URL');
+  add(/(paypa1|g00gle|amaz0n|micros0ft|faceb00k)/i.test(host), 35, 'Brand look-alike spelling');
+  add(/^(bit\.ly|tinyurl\.com|t\.co|goo\.gl)$/i.test(host), 15, 'URL shortener');
+  const score = Math.min(100, flags.reduce((a, f) => a + f[0], 0));
+  const v = score >= 60 ? ['Likely phishing', 'text-rose-400'] : score >= 30 ? ['Suspicious', 'text-amber-400'] : ['Looks low-risk', 'text-emerald-400'];
+  $('url-out').innerHTML = '<p class="text-sm font-semibold ' + v[1] + '">' + v[0] + ' · risk ' + score + '/100</p><p class="text-slate-500 mb-2 break-all">' + esc(host) + '</p>' +
+    (flags.length ? '<ul class="list-disc pl-5 space-y-1 text-slate-300">' + flags.map((f) => '<li>' + f[1] + ' (+' + f[0] + ')</li>').join('') + '</ul>' : '<p>No red flags in the URL structure.</p>');
+  if (score >= 30) { state.phish++; refreshKpis(); }
+  log('URL checked: ' + host + ' → ' + v[0], score >= 60 ? 'bad' : score >= 30 ? 'warn' : 'ok');
+}
+
+/* ---------- Graph ---------- */
+function drawGraph() {
+  const box = $('graph');
+  if (typeof vis === 'undefined') { $('graph-msg').textContent = 'Graph library failed to load (check your connection).'; return; }
+  if (graphNet) { graphNet.redraw(); graphNet.fit(); return; }
+  const n = (id, label, color) => ({ id, label, color: { background: color, border: '#1e293b' }, font: { color: '#e2e8f0', size: 12 }, shape: 'dot', size: 18 });
+  const nodes = new vis.DataSet([n(1, 'Client', '#6366f1'), n(2, 'API Gateway', '#22d3ee'), n(3, 'Policy Engine', '#f59e0b'), n(4, 'Auth Service', '#10b981'), n(5, 'Users API', '#64748b'), n(6, 'Admin API', '#f43f5e'), n(7, 'Phish Intel', '#a78bfa')]);
+  const edges = new vis.DataSet([[1, 2], [2, 3], [3, 4], [3, 7], [2, 5], [2, 6]].map((e) => ({ from: e[0], to: e[1], arrows: 'to', color: '#475569' })));
+  graphNet = new vis.Network(box, { nodes, edges }, { physics: { stabilization: true }, interaction: { hover: true } });
+  graphNet.on('click', (p) => { if (p.nodes.length) toast('Verified: ' + nodes.get(p.nodes[0]).label); });
+  $('graph-msg').textContent = 'Every request is verified at the Policy Engine. Click a node.';
+}
+
+/* ---------- Global scan ---------- */
+let scanning = false;
+function globalScan() {
+  if (scanning) return;
+  scanning = true;
+  toast('Deep scan started…');
+  const steps = ['Scanning repositories…', 'Analyzing API endpoints…', 'Checking phishing feeds…'];
+  steps.forEach((s, i) => setTimeout(() => { toast(s); log(s, 'ok'); }, 700 * (i + 1)));
+  setTimeout(() => {
+    state.blocked += Math.floor(40 + Math.random() * 60);
+    scanApis(); refreshKpis();
+    toast('Deep scan complete', 'text-emerald-400');
+    scanning = false;
+  }, 3000);
+}
+
+/* ---------- Init ---------- */
+renderCats(); scanApis();
+log('SENTINEL initialized in local demo mode', 'ok');
+log('Zero-trust policy loaded: deny by default', 'ok');
+icons();
+observeReveals(document);
+animateBars();
+refreshKpis();
+onScroll();
+// Safety net: never leave content hidden if the observer misbehaves
+setTimeout(() => document.querySelectorAll('.tab.active [data-reveal]:not(.in)').forEach((e) => { const r = e.getBoundingClientRect(); if (r.top < innerHeight) e.classList.add('in'); }), 1500);
+</script>
+</body>
+</html>
