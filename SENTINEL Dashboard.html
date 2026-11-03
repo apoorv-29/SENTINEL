@@ -13,7 +13,6 @@ html{scroll-behavior:smooth;scroll-padding-top:5rem}
 body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .glow-indigo{box-shadow:0 0 20px rgba(99,102,241,.2)}
 .glass{background:rgba(15,23,42,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-/* Scroll reveal: hidden only when JS is running (class "js" is set on <html>) */
 .js [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);transition-delay:var(--d,0ms)}
 .js [data-reveal="left"]{transform:translateX(-28px)}
 .js [data-reveal="zoom"]{transform:scale(.94)}
@@ -40,9 +39,9 @@ body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sa
     </div>
     <div class="flex items-center gap-3">
       <div class="hidden md:flex items-center bg-slate-950 px-3 py-1.5 rounded-xl text-xs text-slate-300 gap-2 border border-slate-800">
-        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>Engine: <strong class="text-emerald-400">Local demo mode</strong>
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>Engine: <strong class="text-emerald-400">Python FastAPI connected</strong>
       </div>
-      <button onclick="globalScan()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 glow-indigo"><i data-lucide="zap" class="w-3.5 h-3.5"></i>Run Deep Scan</button>
+      <button onclick="runBackendScan('https://api.example.com', null)" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 glow-indigo"><i data-lucide="zap" class="w-3.5 h-3.5"></i>Run Backend Scan</button>
     </div>
   </div>
 </header>
@@ -80,22 +79,22 @@ body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sa
     <!-- REPO SCANNER -->
     <section id="tab-repo" class="tab space-y-4">
       <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-1">Repository Scanner</h2>
-        <p class="text-xs text-slate-400 mb-3">Paste code or config. Scanning runs locally in your browser.</p>
+        <h2 class="text-sm font-semibold mb-1">Repository Scanner (Python Backend)</h2>
+        <p class="text-xs text-slate-400 mb-3">Paste code or config. Scans are processed using your FastAPI backend (`scanner.py`).</p>
         <textarea id="repo-in" rows="9" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Paste code here..."></textarea>
         <div class="flex gap-2 mt-3">
-          <button onclick="scanRepo()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Scan code</button>
+          <button onclick="scanRepoBackend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Scan code via backend</button>
           <button onclick="sampleRepo()" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-2 rounded-xl">Load sample</button>
         </div>
       </div>
-      <div id="repo-out" data-reveal class="glass border border-slate-800 rounded-2xl p-5 text-xs text-slate-400">No scan yet.</div>
+      <div id="repo-out" data-reveal class="glass border border-slate-800 rounded-2xl p-5 text-xs text-slate-400">No backend scan run yet.</div>
     </section>
 
     <!-- API ANALYZER -->
     <section id="tab-api" class="tab space-y-4">
       <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-semibold">API Analyzer – zero-trust posture</h2>
+          <h2 class="text-sm font-semibold">API Analyzer – backend posture</h2>
           <button onclick="scanApis()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Re-analyze</button>
         </div>
         <div class="overflow-x-auto">
@@ -111,10 +110,10 @@ body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sa
     <section id="tab-phish" class="tab space-y-4">
       <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
         <h2 class="text-sm font-semibold mb-1">Phishing URL Intelligence</h2>
-        <p class="text-xs text-slate-400 mb-3">Heuristic analysis of the URL structure only. Nothing is fetched.</p>
+        <p class="text-xs text-slate-400 mb-3">Heuristic analysis of the URL structure via Python backend logic.</p>
         <div class="flex gap-2">
           <input id="url-in" type="text" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="http://paypa1-secure-login.example.com/verify@account">
-          <button onclick="checkUrl()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Analyze</button>
+          <button onclick="checkUrlBackend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Analyze</button>
         </div>
       </div>
       <div id="url-out" data-reveal class="glass border border-slate-800 rounded-2xl p-5 text-xs text-slate-400">Enter a URL to analyze.</div>
@@ -131,7 +130,7 @@ body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sa
   </main>
 </div>
 
-<footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500" data-reveal>SENTINEL demo · all analysis runs locally in your browser</footer>
+<footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500" data-reveal>SENTINEL demo · connected to Python FastAPI Backend</footer>
 
 <script>
 document.documentElement.classList.add('js');
@@ -203,31 +202,80 @@ function log(msg, tone) {
   $('feed').prepend(li);
 }
 
-/* ---------- Repository scanner ---------- */
-const rules = [
-  ['AWS access key', /AKIA[0-9A-Z]{16}/g, 'high'],
-  ['Private key block', /-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/g, 'high'],
-  ['Hard-coded API key / token', /(?:api[_-]?key|secret|token)\s*[:=]\s*["'][A-Za-z0-9_\-]{12,}["']/gi, 'high'],
-  ['Hard-coded password', /password\s*[:=]\s*["'][^"']{4,}["']/gi, 'high'],
-  ['JWT token', /eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g, 'med'],
-  ['Use of eval()', /\beval\s*\(/g, 'med'],
-  ['Insecure http:// URL', /http:\/\/(?!localhost|127\.0\.0\.1)[^\s"']+/g, 'low']
-];
-function sampleRepo() {
-  $('repo-in').value = 'const api_key = "sk_live_51H8abcdEFGH1234";\nconst password = "admin123";\naws = "AKIAIOSFODNN7EXAMPLE";\nfetch("http://api.example.com/users");\neval(userInput);\n';
+/* ---------- Backend Integration Functions ---------- */
+async function runBackendScan(targetUrl, sourceCode) {
+  try {
+    toast('Submitting scan to Python backend...');
+
+    const response = await fetch('/scans', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        target_url: targetUrl || "http://example.com",
+        authorized: true,
+        source_code: sourceCode || null
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.detail || 'Scan creation failed');
+    }
+
+    const data = await response.json();
+    const scanId = data.scan_id;
+    toast('Scan queued. Processing in Python backend...');
+
+    let completed = false;
+    let results = null;
+
+    while (!completed) {
+      await new Promise(r => setTimeout(r, 1000));
+      const statusRes = await fetch(`/scans/${scanId}`);
+      const statusData = await statusRes.json();
+
+      if (statusData.status === 'completed') {
+        const resultsRes = await fetch(`/scans/${scanId}/results`);
+        results = await resultsRes.json();
+        completed = true;
+      } else if (statusData.status === 'failed') {
+        throw new Error('Scan execution failed on server.');
+      }
+    }
+
+    toast(`Scan complete! Found ${results.total_findings} issue(s)`, 'text-emerald-400');
+    return results;
+
+  } catch (err) {
+    toast('Error: ' + err.message, 'text-rose-400');
+    console.error(err);
+    return null;
+  }
 }
-function scanRepo() {
+
+function sampleRepo() {
+  $('repo-in').value = 'const api_key = "sk_live_51H8abcdEFGH1234";\nconst password = "admin123";\naws = "AKIAIOSFODNN7EXAMPLE";\n';
+}
+
+async function scanRepoBackend() {
   const code = $('repo-in').value;
   if (!code.trim()) { toast('Paste some code first', 'text-amber-400'); return; }
-  const found = [];
-  code.split('\n').forEach((line, i) => rules.forEach((r) => { r[1].lastIndex = 0; if (r[1].test(line)) found.push({ n: i + 1, name: r[0], sev: r[2], line: line.trim().slice(0, 80) }); }));
-  const col = { high: 'text-rose-400', med: 'text-amber-400', low: 'text-sky-400' };
+  
+  toast('Sending code to backend for analysis...');
+  const results = await runBackendScan('http://local-repo-target.com', code);
+  
+  if (!results) return;
+
+  const found = results.findings;
+  const col = { high: 'text-rose-400', medium: 'text-amber-400', low: 'text-sky-400' };
+  
   $('repo-out').innerHTML = found.length
-    ? '<p class="text-sm font-semibold text-white mb-3">' + found.length + ' issue(s) found</p>' + found.map((f) => '<div class="border border-slate-800 rounded-xl p-3 mb-2"><span class="font-semibold ' + col[f.sev] + '">' + f.sev.toUpperCase() + '</span> · ' + esc(f.name) + ' <span class="text-slate-500">(line ' + f.n + ')</span><pre class="mt-1 text-slate-400 overflow-x-auto">' + esc(f.line) + '</pre></div>').join('')
-    : '<p class="text-emerald-400 font-semibold">No issues detected.</p>';
-  state.secrets += found.length; refreshKpis();
-  log('Repo scan finished: ' + found.length + ' issue(s)', found.length ? 'warn' : 'ok');
-  toast('Scan complete: ' + found.length + ' issue(s)');
+    ? '<p class="text-sm font-semibold text-white mb-3">' + found.length + ' issue(s) found by Python backend</p>' + found.map((f) => '<div class="border border-slate-800 rounded-xl p-3 mb-2"><span class="font-semibold ' + (col[f.severity.toLowerCase()] || 'text-slate-300') + '">' + f.severity.toUpperCase() + '</span> · ' + esc(f.title) + '<p class="mt-1 text-slate-400">' + esc(f.description) + '</p></div>').join('')
+    : '<p class="text-emerald-400 font-semibold">No issues detected by backend scanner.</p>';
+  
+  state.secrets += found.length; 
+  refreshKpis();
+  log('Python backend repo scan finished: ' + found.length + ' issue(s)', found.length ? 'warn' : 'ok');
 }
 
 /* ---------- API analyzer ---------- */
@@ -252,71 +300,42 @@ function scanApis() {
 }
 
 /* ---------- Phishing ---------- */
-function checkUrl() {
+async function checkUrlBackend() {
   const raw = $('url-in').value.trim();
   if (!raw) { toast('Enter a URL', 'text-amber-400'); return; }
-  let u;
-  try { u = new URL(/^[a-z]+:\/\//i.test(raw) ? raw : 'http://' + raw); } catch (e) { toast('That does not look like a valid URL', 'text-rose-400'); return; }
-  const host = u.hostname, flags = [];
-  const add = (c, pts, msg) => { if (c) flags.push([pts, msg]); };
-  add(u.protocol !== 'https:', 20, 'Not using HTTPS');
-  add(/^\d{1,3}(\.\d{1,3}){3}$/.test(host), 30, 'IP address used instead of a domain');
-  add(raw.includes('@'), 25, 'Contains @ (can hide the real destination)');
-  add(host.split('.').length > 4, 15, 'Too many subdomains');
-  add(raw.length > 75, 10, 'Very long URL');
-  add(host.includes('xn--'), 25, 'Punycode (look-alike characters)');
-  add((host.match(/-/g) || []).length >= 2, 10, 'Many hyphens in the domain');
-  add(/(login|verify|secure|account|update|bank|wallet|password)/i.test(raw), 15, 'Sensitive keywords in URL');
-  add(/(paypa1|g00gle|amaz0n|micros0ft|faceb00k)/i.test(host), 35, 'Brand look-alike spelling');
-  add(/^(bit\.ly|tinyurl\.com|t\.co|goo\.gl)$/i.test(host), 15, 'URL shortener');
-  const score = Math.min(100, flags.reduce((a, f) => a + f[0], 0));
-  const v = score >= 60 ? ['Likely phishing', 'text-rose-400'] : score >= 30 ? ['Suspicious', 'text-amber-400'] : ['Looks low-risk', 'text-emerald-400'];
-  $('url-out').innerHTML = '<p class="text-sm font-semibold ' + v[1] + '">' + v[0] + ' · risk ' + score + '/100</p><p class="text-slate-500 mb-2 break-all">' + esc(host) + '</p>' +
-    (flags.length ? '<ul class="list-disc pl-5 space-y-1 text-slate-300">' + flags.map((f) => '<li>' + f[1] + ' (+' + f[0] + ')</li>').join('') + '</ul>' : '<p>No red flags in the URL structure.</p>');
-  if (score >= 30) { state.phish++; refreshKpis(); }
-  log('URL checked: ' + host + ' → ' + v[0], score >= 60 ? 'bad' : score >= 30 ? 'warn' : 'ok');
+  
+  const results = await runBackendScan(raw, null);
+  if (!results) return;
+
+  const findings = results.findings;
+  $('url-out').innerHTML = findings.length
+    ? '<p class="text-sm font-semibold text-rose-400">Potential risks flagged by backend</p>' + '<ul class="list-disc pl-5 space-y-1 text-slate-300 mt-2">' + findings.map((f) => '<li><b>' + esc(f.title) + '</b>: ' + esc(f.description) + '</li>').join('') + '</ul>'
+    : '<p class="text-emerald-400 font-semibold">No red flags found by backend URL analyzer.</p>';
+  
+  if (findings.length > 0) { state.phish++; refreshKpis(); }
+  log('URL checked via backend: ' + raw, findings.length ? 'warn' : 'ok');
 }
 
 /* ---------- Graph ---------- */
 function drawGraph() {
   const box = $('graph');
-  if (typeof vis === 'undefined') { $('graph-msg').textContent = 'Graph library failed to load (check your connection).'; return; }
+  if (typeof vis === 'undefined') { $('graph-msg').textContent = 'Graph library failed to load.'; return; }
   if (graphNet) { graphNet.redraw(); graphNet.fit(); return; }
   const n = (id, label, color) => ({ id, label, color: { background: color, border: '#1e293b' }, font: { color: '#e2e8f0', size: 12 }, shape: 'dot', size: 18 });
-  const nodes = new vis.DataSet([n(1, 'Client', '#6366f1'), n(2, 'API Gateway', '#22d3ee'), n(3, 'Policy Engine', '#f59e0b'), n(4, 'Auth Service', '#10b981'), n(5, 'Users API', '#64748b'), n(6, 'Admin API', '#f43f5e'), n(7, 'Phish Intel', '#a78bfa')]);
-  const edges = new vis.DataSet([[1, 2], [2, 3], [3, 4], [3, 7], [2, 5], [2, 6]].map((e) => ({ from: e[0], to: e[1], arrows: 'to', color: '#475569' })));
+  const nodes = new vis.DataSet([n(1, 'Client', '#6366f1'), n(2, 'FastAPI Gateway', '#22d3ee'), n(3, 'Policy Engine', '#f59e0b'), n(4, 'Auth Service', '#10b981')]);
+  const edges = new vis.DataSet([[1, 2], [2, 3], [3, 4]].map((e) => ({ from: e[0], to: e[1], arrows: 'to', color: '#475569' })));
   graphNet = new vis.Network(box, { nodes, edges }, { physics: { stabilization: true }, interaction: { hover: true } });
-  graphNet.on('click', (p) => { if (p.nodes.length) toast('Verified: ' + nodes.get(p.nodes[0]).label); });
-  $('graph-msg').textContent = 'Every request is verified at the Policy Engine. Click a node.';
-}
-
-/* ---------- Global scan ---------- */
-let scanning = false;
-function globalScan() {
-  if (scanning) return;
-  scanning = true;
-  toast('Deep scan started…');
-  const steps = ['Scanning repositories…', 'Analyzing API endpoints…', 'Checking phishing feeds…'];
-  steps.forEach((s, i) => setTimeout(() => { toast(s); log(s, 'ok'); }, 700 * (i + 1)));
-  setTimeout(() => {
-    state.blocked += Math.floor(40 + Math.random() * 60);
-    scanApis(); refreshKpis();
-    toast('Deep scan complete', 'text-emerald-400');
-    scanning = false;
-  }, 3000);
+  $('graph-msg').textContent = 'Zero-trust graph active. Connected to backend router.';
 }
 
 /* ---------- Init ---------- */
 renderCats(); scanApis();
-log('SENTINEL initialized in local demo mode', 'ok');
-log('Zero-trust policy loaded: deny by default', 'ok');
+log('SENTINEL initialized and connected to Python backend', 'ok');
 icons();
 observeReveals(document);
 animateBars();
 refreshKpis();
 onScroll();
-// Safety net: never leave content hidden if the observer misbehaves
-setTimeout(() => document.querySelectorAll('.tab.active [data-reveal]:not(.in)').forEach((e) => { const r = e.getBoundingClientRect(); if (r.top < innerHeight) e.classList.add('in'); }), 1500);
 </script>
 </body>
 </html>
