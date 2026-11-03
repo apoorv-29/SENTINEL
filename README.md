@@ -1,7 +1,7 @@
 # SENTINEL
 SENTINEL 🛡️
 
-A smart, security-focused project built with Python.
+A smart, security-focused project built with Python FASTAPI
 
 SENTINEL is a Python-based project designed with a focus on clean development, modularity, and practical implementation. This repository contains the source code and resources required to run and develop the project.
 
