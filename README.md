@@ -1,39 +1,123 @@
-# SENTINEL
 SENTINEL 🛡️
+Zero-Trust API Security & Phishing Intelligence Platform
 
-A smart, security-focused project built with Python FASTAPI
+Secure your APIs. Detect threats. Protect your infrastructure.
 
-SENTINEL is a Python-based project designed with a focus on clean development, modularity, and practical implementation. This repository contains the source code and resources required to run and develop the project.
+SENTINEL is an enterprise-focused security and threat-intelligence platform designed to help startups and development teams identify potential API security weaknesses, exposed secrets, and phishing-related threats.
 
-🚀 Features
-Python-based implementation
-Modular project structure
-Organized source code
-Easy local setup and execution
-Designed for future improvements and extensions
-📁 Project Structure
+By combining automated security analysis with an interactive threat-visualization dashboard, SENTINEL aims to make cybersecurity monitoring more accessible, understandable, and actionable.
+
+🎯 The Problem
+
+Modern startups deploy applications and APIs rapidly, often leaving security gaps that can expose critical infrastructure.
+
+Common risks include:
+
+Exposed API keys and sensitive credentials.
+Insufficient API rate limiting.
+Suspicious or potentially malicious endpoints.
+Phishing URLs and deceptive domains.
+Limited visibility into application security risks.
+
+Traditional security tools can be difficult to understand and expensive for smaller development teams.
+
+💡 Our Solution
+
+SENTINEL provides a centralized threat-intelligence dashboard where users can submit a repository URL or API endpoint for security analysis.
+
+The platform is designed to identify potential vulnerabilities, analyze suspicious patterns, and present findings through an intuitive visual interface.
+
+✨ Key Features
+1. Repository Security Scanner
+Scan submitted repositories for accidentally exposed secrets.
+Identify potential API keys and sensitive credentials.
+Highlight security-related findings for further investigation.
+2. API Security Analysis
+Analyze API endpoints for security weaknesses.
+Check for missing or insufficient rate-limiting protections.
+Identify potentially misconfigured endpoints.
+Generate structured security findings.
+3. Phishing Intelligence Scanner
+Analyze submitted URLs for suspicious patterns.
+Identify potentially deceptive domains.
+Check URLs against available threat-intelligence sources.
+Highlight suspicious indicators for investigation.
+4. Interactive Threat Visualization
+Visual representation of identified security findings.
+Interactive node-based threat graph.
+Clickable and draggable graph elements.
+Visual connections between endpoints, findings, and potential risks.
+5. Enterprise Dashboard
+Clean and modern light-mode interface.
+Centralized security overview.
+Organized vulnerability reports.
+Easy-to-understand threat indicators.
+🎨 Design Philosophy
+
+SENTINEL moves away from traditional hacker-themed interfaces.
+
+Our dashboard focuses on:
+
+Minimalist light-mode design.
+Clean typography and intuitive navigation.
+Clear security indicators.
+Interactive visualizations.
+A professional enterprise software experience.
+
+The goal: Make complex security information easy to understand and act upon.
+
+🏗️ System Architecture
+
+The platform is designed around the following components:
+
 text
-SENTINEL/
-│
-├── venv/                 # Virtual environment (local only)
-├── __pycache__/          # Python cache files
-├── README.md             # Project documentation
-├── requirements.txt      # Project dependencies
-└── main.py               # Main application entry point
+              SENTINEL PLATFORM
+                      |
+          +-----------+-----------+
+          |                       |
+     User Dashboard          Input Layer
+          |                       |
+          |              +--------+--------+
+          |              |                 |
+          |         Repository URL     API Endpoint
+          |              |                 |
+          +--------------+-----------------+
+                         |
+                  Security Engine
+                         |
+          +--------------+--------------+
+          |              |              |
+      Secret Scan    API Analysis   Phishing Scan
+          |              |              |
+          +--------------+--------------+
+                         |
+                  Findings Engine
+                         |
+               Threat Visualization
+                         |
+                Security Dashboard
 
+🛠️ Technology Stack
 
-Note: Update the structure above to match the actual files in your repository.
+The final technology stack will depend on the implemented modules.
 
-🛠️ Tech Stack
-Language: Python
-Environment: Python Virtual Environment
-Version Control: Git & GitHub
+Component	Technology
+Backend	Python
+Frontend	To be finalized
+API Layer	REST API
+Security Analysis	Python-based scanning modules
+Threat Visualization	Interactive graph library
+Version Control	Git & GitHub
 ⚙️ Installation & Setup
+Prerequisites
+Python 3.10 or higher
+Git
+Node.js and npm (if using a JavaScript frontend)
 1. Clone the repository
 bash
 git clone https://github.com/apoorv-29/SENTINEL.git
 
-2. Navigate to the project directory
+2. Navigate to the project
 bash
 cd SENTINEL
 
@@ -41,7 +125,7 @@ cd SENTINEL
 bash
 python -m venv venv
 
-4. Activate the virtual environment
+4. Activate the environment
 
 Windows:
 
@@ -58,39 +142,14 @@ source venv/bin/activate
 bash
 pip install -r requirements.txt
 
-6. Run the project
-bash
-python main.py
+6. Start the application
 
-🔧 Configuration
+Use the appropriate startup command for the implemented backend and frontend.
 
-If the project requires environment variables or API credentials, configure them locally before running the application.
+👥 Team Structure
 
-Never commit passwords, API keys, tokens, or other sensitive information to GitHub.
 
-🗺️ Future Improvements
-Improve performance and reliability
-Add new functionality and modules
-Enhance documentation
-Expand testing and error handling
-🤝 Contributing
 
-Contributions, suggestions, and improvements are welcome.
+🔐 Security & Responsible Usage
 
-Fork the repository.
-Create a new branch.
-Make your changes.
-Submit a pull request.
-📜 License
-
-No license has been specified yet. All rights are reserved by the repository owner unless a license is added.
-
-👨‍💻 Author
-
-Apoorv
-
-GitHub: @apoorv-29
-
-<p align="center">
-**SENTINEL — Built to evolve. Designed to protect.**
-</p>
+SENTINEL is intended for authorized security assessment and defensive security research
