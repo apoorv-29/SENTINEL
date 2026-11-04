@@ -90,3 +90,8 @@ Open **http://127.0.0.1:8000/** for the dashboard and **/docs** for the interact
 2. Open **Scanner** and run a scan.
 3. Check **Overview** and **Analytics** to see your data.
 <img width="1366" height="730" alt="Screenshot (182)" src="https://github.com/user-attachments/assets/c98dd886-d086-4258-a326-3cd5555f1541" />
+<img width="1366" height="725" alt="Screenshot (183)" src="https://github.com/user-attachments/assets/8e868e93-506c-4df9-8783-cce115892d36" />
+<img width="1366" height="730" alt="Screenshot (184)" src="https://github.com/user-attachments/assets/7133ea1b-2ca0-425e-bb7d-9b228fa04561" />
+<img width="1366" height="730" alt="Screenshot (185)" src="https://github.com/user-attachments/assets/6feaa426-c872-4bca-b58b-d0414d99f469" />
+<img width="1366" height="725" alt="Screenshot (186)" src="https://github.com/user-attachments/assets/e414ae9d-539c-430b-8d58-35726856c94f" />
+<img width="1366" height="730" alt="Screenshot (187)" src="https://github.com/user-attachments/assets/c55b9ae1-15e9-486b-8521-9de5b2a63030" />
