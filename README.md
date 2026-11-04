@@ -1,149 +1,91 @@
-SENTINEL 🛡️
-Zero-Trust API Security & Phishing Intelligence Platform
+# 🛡️ SENTINEL
 
-Secure your APIs. Detect threats. Protect your infrastructure.
+**Zero-trust security intelligence for URLs, source code and API responses.**
 
-SENTINEL is an enterprise-focused security and threat-intelligence platform designed to help startups and development teams identify potential API security weaknesses, exposed secrets, and phishing-related threats.
+Authenticated, organization-scoped scanning with a multi-page dashboard, live charts, team chat and voice messages.
 
-By combining automated security analysis with an interactive threat-visualization dashboard, SENTINEL aims to make cybersecurity monitoring more accessible, understandable, and actionable.
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?logo=chartdotjs&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 
-🎯 The Problem
+</div>
 
-Modern startups deploy applications and APIs rapidly, often leaving security gaps that can expose critical infrastructure.
+---
 
-Common risks include:
+## Overview
 
-Exposed API keys and sensitive credentials.
-Insufficient API rate limiting.
-Suspicious or potentially malicious endpoints.
-Phishing URLs and deceptive domains.
-Limited visibility into application security risks.
+SENTINEL helps a team review the security posture of the things they ship. Paste a URL, a code snippet or a set of response headers, and it flags common red flags (phishing patterns, missing HTTPS, hardcoded secrets, absent rate-limit headers). Results are stored per organization, summarized automatically, and shown on a dashboard with charts and graphs.
 
-Traditional security tools can be difficult to understand and expensive for smaller development teams.
+Every API request is authenticated and every query is filtered by organization on the server, so one tenant can never read another tenant's scans.
 
-💡 Our Solution
+> **Note:** SENTINEL uses heuristics. An empty result is not proof that an asset is safe. Only scan targets and source code you are authorized to assess.
 
-SENTINEL provides a centralized threat-intelligence dashboard where users can submit a repository URL or API endpoint for security analysis.
+<!-- Add screenshots to docs/ and uncomment:
+![Overview](docs/overview.png)
+![Analytics](docs/analytics.png)
+-->
 
-The platform is designed to identify potential vulnerabilities, analyze suspicious patterns, and present findings through an intuitive visual interface.
+## Features
 
-✨ Key Features
-1. Repository Security Scanner
-Scan submitted repositories for accidentally exposed secrets.
-Identify potential API keys and sensitive credentials.
-Highlight security-related findings for further investigation.
-2. API Security Analysis
-Analyze API endpoints for security weaknesses.
-Check for missing or insufficient rate-limiting protections.
-Identify potentially misconfigured endpoints.
-Generate structured security findings.
-3. Phishing Intelligence Scanner
-Analyze submitted URLs for suspicious patterns.
-Identify potentially deceptive domains.
-Check URLs against available threat-intelligence sources.
-Highlight suspicious indicators for investigation.
-4. Interactive Threat Visualization
-Visual representation of identified security findings.
-Interactive node-based threat graph.
-Clickable and draggable graph elements.
-Visual connections between endpoints, findings, and potential risks.
-5. Enterprise Dashboard
-Clean and modern light-mode interface.
-Centralized security overview.
-Organized vulnerability reports.
-Easy-to-understand threat indicators.
-🎨 Design Philosophy
+**Security scanning**
+- **URL analysis:** flags missing HTTPS, unusually hyphenated hostnames and keywords often used in phishing (`login`, `verify`, `wallet`, ...).
+- **Secret detection:** finds hardcoded API keys, secret tokens and private keys in pasted source code.
+- **Header checks:** reports when no rate-limit header is present.
+- **Evidence graph:** each scan produces a graph linking the target to its findings.
 
-SENTINEL moves away from traditional hacker-themed interfaces.
+**Platform**
+- **Auth:** registration and login with salted `scrypt` password hashing, 15-minute access tokens and rotating 7-day refresh tokens.
+- **Multi-tenancy:** an organization is created at registration, and all scans are scoped to it.
+- **Search:** filter scans by text, severity, category and status, with browser text-to-speech to read results aloud.
+- **Automated summary:** `GET /api/v1/automation/scan-summary` returns scan count, finding count and severity/category totals in a single call.
+- **Team chat:** persisted direct messages over REST with live delivery over WebSocket.
+- **Voice messages:** record a short clip from the home page and send it to a teammate. Audio is only downloadable by the sender and recipient.
 
-Our dashboard focuses on:
+**Dashboard (8 pages)**
 
-Minimalist light-mode design.
-Clean typography and intuitive navigation.
-Clear security indicators.
-Interactive visualizations.
-A professional enterprise software experience.
+| Page | What it shows |
+|---|---|
+| Overview | Totals, severity doughnut, findings by category, threat categories, live feed, API endpoint posture, voice bar |
+| Scanner | URL, code and header form with a per-scan severity chart |
+| Scans | Scan history with a graph for each selected scan |
+| Analytics | Stacked findings per scan, risk score gauge, scans over time, category radar |
+| Trust Graph | The zero-trust request path as an interactive graph |
+| Search | Filters and read-aloud |
+| Chat | Teammate lookup and live messaging |
+| Account | Sign in, register, session details |
 
-The goal: Make complex security information easy to understand and act upon.
+Pages fade in on navigation, cards animate on scroll, and a progress bar tracks the page position. Signed-out visitors see clearly labelled sample data.
 
-🏗️ System Architecture
+## Tech stack
 
-The platform is designed around the following components:
+| Layer | Tools |
+|---|---|
+| Backend | Python, FastAPI, Pydantic v2, Uvicorn |
+| Storage | SQLite (interim; see [Roadmap](#roadmap)) |
+| Frontend | Single HTML file, Tailwind CSS, Chart.js, vis-network, Lucide icons |
+| Realtime | WebSocket (chat and voice notifications), `MediaRecorder` API (voice) |
+| Packaging | Docker |
+| Testing | pytest, httpx |
 
-text
-              SENTINEL PLATFORM
-                      |
-          +-----------+-----------+
-          |                       |
-     User Dashboard          Input Layer
-          |                       |
-          |              +--------+--------+
-          |              |                 |
-          |         Repository URL     API Endpoint
-          |              |                 |
-          +--------------+-----------------+
-                         |
-                  Security Engine
-                         |
-          +--------------+--------------+
-          |              |              |
-      Secret Scan    API Analysis   Phishing Scan
-          |              |              |
-          +--------------+--------------+
-                         |
-                  Findings Engine
-                         |
-               Threat Visualization
-                         |
-                Security Dashboard
+## Getting started
 
-🛠️ Technology Stack
+### Run locally
 
-The final technology stack will depend on the implemented modules.
+```bash
+git clone https://github.com/<your-username>/sentinel.git
+cd sentinel
 
-Component	Technology
-Backend	Python
-Frontend	To be finalized
-API Layer	REST API
-Security Analysis	Python-based scanning modules
-Threat Visualization	Interactive graph library
-Version Control	Git & GitHub
-⚙️ Installation & Setup
-Prerequisites
-Python 3.10 or higher
-Git
-Node.js and npm (if using a JavaScript frontend)
-1. Clone the repository
-bash
-git clone https://github.com/apoorv-29/SENTINEL.git
-
-2. Navigate to the project
-bash
-cd SENTINEL
-
-3. Create a virtual environment
-bash
-python -m venv venv
-
-4. Activate the environment
-
-Windows:
-
-bash
-venv\Scripts\activate
-
-
-Linux / macOS:
-
-bash
-source venv/bin/activate
-
-5. Install dependencies
-bash
+python3 -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-6. Start the application
+uvicorn main:app --reload
+```
 
-Use the appropriate startup command for the implemented backend and frontend.
-🔐 Security & Responsible Usage
-SENTINEL is intended for authorized security assessment and defensive security research
+Open **http://127.0.0.1:8000/** for the dashboard and **/docs** for the interactive API reference.
+
+1. Go to the **Account** page and register. Passwords need at least 12 characters.
+2. Open **Scanner** and run a scan.
+3. Check **Overview** and **Analytics** to see your data.
