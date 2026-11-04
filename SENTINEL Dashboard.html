@@ -1,341 +1,427 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-slate-950" style="color-scheme:dark">
+<html lang="en" style="color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SENTINEL – Zero-Trust API Security & Phishing Intelligence Platform</title>
+<title>SENTINEL – Zero-Trust Security Intelligence</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 <style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--ind:#6366f1;--cy:#22d3ee;--em:#10b981;--am:#f59e0b;--ro:#f43f5e}
 html{scroll-behavior:smooth;scroll-padding-top:5rem}
-body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.glow-indigo{box-shadow:0 0 20px rgba(99,102,241,.2)}
-.glass{background:rgba(15,23,42,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.js [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);transition-delay:var(--d,0ms)}
-.js [data-reveal="left"]{transform:translateX(-28px)}
-.js [data-reveal="zoom"]{transform:scale(.94)}
-.js [data-reveal].in{opacity:1;transform:none}
-#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#6366f1,#22d3ee);z-index:60}
-.tab{display:none}.tab.active{display:block}
-.navbtn.active{background:rgba(99,102,241,.1);color:#818cf8;border-color:rgba(99,102,241,.25)}
-.bar{transition:width 1s cubic-bezier(.16,1,.3,1)}
-@media (prefers-reduced-motion:reduce){.js [data-reveal]{transition:none;opacity:1;transform:none}html{scroll-behavior:auto}}
+body{background:#020617;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background-image:radial-gradient(900px 400px at 15% -5%,rgba(99,102,241,.15),transparent),radial-gradient(700px 400px at 95% 10%,rgba(34,211,238,.08),transparent);background-attachment:fixed}
+.glass{background:rgba(15,23,42,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card{border:1px solid rgb(30 41 59);border-radius:1rem;padding:1.25rem;transition:border-color .3s,transform .3s}
+.card:hover{border-color:rgba(99,102,241,.4)}
+.inp{background:#020617;border:1px solid rgb(30 41 59);border-radius:.75rem;padding:.5rem .75rem;font-size:.75rem;width:100%;color:#e2e8f0}
+.inp:focus{outline:none;box-shadow:0 0 0 2px rgba(99,102,241,.6)}
+.btn{font-size:.75rem;font-weight:600;padding:.5rem 1rem;border-radius:.75rem;transition:background .2s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-p{background:#4f46e5}.btn-p:hover{background:#6366f1}
+.btn-s{background:#1e293b}.btn-s:hover{background:#334155}
+.btn-c{background:#0891b2}.btn-c:hover{background:#06b6d4}
+.js [data-r]{opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);transition-delay:var(--d,0ms)}
+.js [data-r=left]{transform:translateX(-30px)}.js [data-r=right]{transform:translateX(30px)}.js [data-r=zoom]{transform:scale(.94)}
+.js [data-r].in{opacity:1;transform:none}
+.page{display:none}.page.active{display:block;animation:pg .45s ease}
+@keyframes pg{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.nav a{display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:#94a3b8;padding:.45rem .8rem;border-radius:.75rem;border:1px solid transparent;white-space:nowrap}
+.nav a:hover{color:#e2e8f0}.nav a.active{background:rgba(99,102,241,.12);color:#a5b4fc;border-color:rgba(99,102,241,.3)}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#6366f1,#22d3ee);z-index:70}
+.sev-critical{color:#fb7185}.sev-high{color:#fb923c}.sev-medium{color:#fbbf24}.sev-low{color:#38bdf8}.sev-info{color:#94a3b8}
+.bar{transition:width 1.1s cubic-bezier(.16,1,.3,1)}
+.hero-grid{background-image:linear-gradient(rgba(99,102,241,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.07) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,#000 30%,transparent)}
+@media (prefers-reduced-motion:reduce){.js [data-r]{transition:none;opacity:1;transform:none}.page.active{animation:none}html{scroll-behavior:auto}}
 </style>
 </head>
 <body class="text-slate-100 antialiased min-h-screen flex flex-col">
 <div id="progress"></div>
-<div id="toasts" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none flex flex-col items-end"></div>
+<div id="toasts" class="fixed bottom-4 right-4 z-[80] space-y-2 pointer-events-none flex flex-col items-end"></div>
 
 <header class="glass border-b border-slate-800 sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 p-2 rounded-xl glow-indigo"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
-      <div>
-        <h1 class="text-lg font-bold text-white flex items-center gap-2">SENTINEL <span class="text-[10px] px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/30">Zero-Trust v1.0</span></h1>
-        <p class="text-xs text-slate-400 hidden sm:block">API Security &amp; Phishing Intelligence Platform</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-3">
-      <div class="hidden md:flex items-center bg-slate-950 px-3 py-1.5 rounded-xl text-xs text-slate-300 gap-2 border border-slate-800">
-        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>Engine: <strong class="text-emerald-400">Python FastAPI connected</strong>
-      </div>
-      <button onclick="runBackendScan('https://api.example.com', null)" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 glow-indigo"><i data-lucide="zap" class="w-3.5 h-3.5"></i>Run Backend Scan</button>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <a href="#/overview" class="flex items-center gap-3 shrink-0">
+      <div class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 p-2 rounded-xl"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
+      <div class="leading-tight"><div class="font-bold text-white">SENTINEL</div><div class="text-[10px] text-slate-400 hidden sm:block">Zero-Trust Security Intelligence</div></div>
+    </a>
+    <nav class="nav hidden lg:flex items-center gap-1" id="nav-desktop"></nav>
+    <div class="flex items-center gap-2 shrink-0">
+      <span id="data-badge" class="hidden md:inline text-[10px] px-2 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300">Sample data</span>
+      <a href="#/account" id="user-chip" class="text-xs text-slate-300 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5">Sign in</a>
     </div>
   </div>
+  <nav class="nav lg:hidden flex gap-1 overflow-x-auto px-3 pb-2" id="nav-mobile"></nav>
 </header>
 
-<div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
-  <aside class="lg:col-span-1">
-    <nav class="glass p-3 rounded-2xl border border-slate-800 space-y-1 lg:sticky lg:top-24" data-reveal="left">
-      <button data-tab="overview" class="navbtn active w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="layout-dashboard" class="w-4 h-4"></i>Threat Overview</button>
-      <button data-tab="repo" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="file-code" class="w-4 h-4"></i>Repository Scanner</button>
-      <button data-tab="api" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="server" class="w-4 h-4"></i>API Analyzer</button>
-      <button data-tab="phish" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="fish" class="w-4 h-4"></i>Phishing Intel</button>
-      <button data-tab="graph" class="navbtn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-400 border border-transparent hover:text-slate-200"><i data-lucide="network" class="w-4 h-4"></i>Trust Graph</button>
-    </nav>
-  </aside>
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
 
-  <main class="lg:col-span-3">
-    <!-- OVERVIEW -->
-    <section id="tab-overview" class="tab active space-y-6">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div data-reveal style="--d:0ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Threats blocked</p><p id="k-blocked" class="text-2xl font-bold text-rose-400 mt-1">0</p></div>
-        <div data-reveal style="--d:100ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Secrets found</p><p id="k-secrets" class="text-2xl font-bold text-amber-400 mt-1">0</p></div>
-        <div data-reveal style="--d:200ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">APIs at risk</p><p id="k-apis" class="text-2xl font-bold text-indigo-400 mt-1">0</p></div>
-        <div data-reveal style="--d:300ms" class="glass border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Phish URLs flagged</p><p id="k-phish" class="text-2xl font-bold text-emerald-400 mt-1">0</p></div>
-      </div>
-      <div data-reveal="zoom" class="glass border border-slate-800 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-4">Threat categories (last 24h)</h2>
-        <div id="cats" class="space-y-3"></div>
-      </div>
-      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-3">Live event feed</h2>
-        <ul id="feed" class="space-y-2 text-xs text-slate-300 max-h-64 overflow-y-auto"></ul>
-      </div>
-    </section>
+<!-- ================= OVERVIEW ================= -->
+<section id="page-overview" class="page space-y-6">
+  <div class="relative overflow-hidden card glass">
+    <div class="hero-grid absolute inset-0"></div>
+    <div class="relative" data-r>
+      <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 1 · THREAT OVERVIEW</p>
+      <h1 class="text-2xl sm:text-3xl font-bold mt-1">Your organization's security posture at a glance</h1>
+      <p class="text-sm text-slate-400 mt-2 max-w-2xl">Aggregated from every scan in your organization: totals, severity mix, attack categories and the latest scan activity. Sign in to see live data; otherwise sample data is shown.</p>
+      <div class="flex gap-2 mt-4"><a href="#/scanner" class="btn btn-p">Run a scan</a><a href="#/analytics" class="btn btn-s">View analytics</a></div>
+    </div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="card glass" data-r style="--d:0ms"><p class="text-xs text-slate-400">Total scans</p><p id="k-scans" class="text-3xl font-bold text-indigo-300 mt-1">0</p></div>
+    <div class="card glass" data-r style="--d:80ms"><p class="text-xs text-slate-400">Total findings</p><p id="k-findings" class="text-3xl font-bold text-cyan-300 mt-1">0</p></div>
+    <div class="card glass" data-r style="--d:160ms"><p class="text-xs text-slate-400">High / critical</p><p id="k-high" class="text-3xl font-bold text-rose-400 mt-1">0</p></div>
+    <div class="card glass" data-r style="--d:240ms"><p class="text-xs text-slate-400">Exposed secrets</p><p id="k-secrets" class="text-3xl font-bold text-amber-300 mt-1">0</p></div>
+  </div>
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="card glass" data-r="left"><h2 class="text-sm font-semibold mb-3">Severity mix</h2><div class="h-60"><canvas id="ch-sev"></canvas></div></div>
+    <div class="card glass lg:col-span-2" data-r="right"><h2 class="text-sm font-semibold mb-3">Findings by category</h2><div class="h-60"><canvas id="ch-cat"></canvas></div></div>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="card glass" data-r><h2 class="text-sm font-semibold mb-3">Threat categories (last 24h)</h2><div id="cats" class="space-y-3"></div></div>
+    <div class="card glass" data-r><h2 class="text-sm font-semibold mb-3">Live event feed</h2><ul id="feed" class="space-y-2 text-xs text-slate-300 max-h-64 overflow-y-auto"></ul></div>
+  </div>
+  <div class="card glass" data-r>
+    <div class="flex items-center justify-between mb-3"><h2 class="text-sm font-semibold">API endpoint posture</h2><span class="text-[10px] text-slate-500">Reference inventory</span></div>
+    <div class="overflow-x-auto"><table class="w-full text-xs text-left"><thead class="text-slate-400"><tr><th class="py-2 pr-3">Endpoint</th><th>Auth</th><th>TLS</th><th>Rate limit</th><th>Risk</th></tr></thead><tbody id="api-rows"></tbody></table></div>
+  </div>
+</section>
 
-    <!-- REPO SCANNER -->
-    <section id="tab-repo" class="tab space-y-4">
-      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-1">Repository Scanner (Python Backend)</h2>
-        <p class="text-xs text-slate-400 mb-3">Paste code or config. Scans are processed using your FastAPI backend (`scanner.py`).</p>
-        <textarea id="repo-in" rows="9" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Paste code here..."></textarea>
-        <div class="flex gap-2 mt-3">
-          <button onclick="scanRepoBackend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Scan code via backend</button>
-          <button onclick="sampleRepo()" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-2 rounded-xl">Load sample</button>
-        </div>
-      </div>
-      <div id="repo-out" data-reveal class="glass border border-slate-800 rounded-2xl p-5 text-xs text-slate-400">No backend scan run yet.</div>
-    </section>
+<!-- ================= SCANNER ================= -->
+<section id="page-scanner" class="page space-y-6">
+  <div class="card glass" data-r>
+    <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 2 · SCANNER</p>
+    <h1 class="text-2xl font-bold mt-1">Analyze a URL, source code and response headers</h1>
+    <p class="text-sm text-slate-400 mt-2 max-w-2xl">Submits to <code class="text-cyan-300">POST /api/v1/scans</code>, polls until finished, then shows findings with severity. Only scan assets you are authorized to assess.</p>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="card glass space-y-3" data-r="left">
+      <div><label class="text-xs text-slate-400">Target URL</label><input id="sc-url" class="inp mt-1" placeholder="http://paypa1-secure-login.example.com/verify"></div>
+      <div><label class="text-xs text-slate-400">Source code / config (optional)</label><textarea id="sc-code" rows="6" class="inp mt-1 font-mono" placeholder="Paste code to detect hardcoded secrets…"></textarea></div>
+      <div><label class="text-xs text-slate-400">Response headers as JSON (optional)</label><textarea id="sc-headers" rows="3" class="inp mt-1 font-mono" placeholder='{"Content-Type":"application/json"}'></textarea></div>
+      <div class="flex flex-wrap gap-2"><button class="btn btn-p" id="sc-run">Run scan</button><button class="btn btn-s" id="sc-sample">Load sample</button></div>
+    </div>
+    <div class="card glass" data-r="right"><h2 class="text-sm font-semibold mb-3">Result</h2><div id="sc-out" class="text-xs text-slate-400">No scan run yet.</div><div class="h-52 mt-4 hidden" id="sc-chart-wrap"><canvas id="ch-scan"></canvas></div></div>
+  </div>
+</section>
 
-    <!-- API ANALYZER -->
-    <section id="tab-api" class="tab space-y-4">
-      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-semibold">API Analyzer – backend posture</h2>
-          <button onclick="scanApis()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Re-analyze</button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left">
-            <thead class="text-slate-400"><tr><th class="py-2 pr-3">Endpoint</th><th class="pr-3">Auth</th><th class="pr-3">TLS</th><th class="pr-3">Rate limit</th><th class="pr-3">Risk</th></tr></thead>
-            <tbody id="api-rows"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+<!-- ================= SCANS ================= -->
+<section id="page-scans" class="page space-y-6">
+  <div class="card glass" data-r>
+    <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 3 · SCAN HISTORY</p>
+    <h1 class="text-2xl font-bold mt-1">Every scan in your organization</h1>
+    <p class="text-sm text-slate-400 mt-2">Select a scan to inspect its findings and its per-scan evidence graph.</p>
+  </div>
+  <div class="grid lg:grid-cols-5 gap-4">
+    <div class="card glass lg:col-span-3 overflow-x-auto" data-r="left"><table class="w-full text-xs text-left"><thead class="text-slate-400"><tr><th class="py-2">Target</th><th>Status</th><th>Findings</th><th>Created</th></tr></thead><tbody id="scan-rows"></tbody></table></div>
+    <div class="card glass lg:col-span-2" data-r="right"><h2 class="text-sm font-semibold mb-2" id="sd-title">Scan detail</h2><div id="sd-body" class="text-xs text-slate-400">Select a scan.</div><div id="sd-graph" class="h-56 mt-3 bg-slate-950 border border-slate-800 rounded-xl hidden"></div></div>
+  </div>
+</section>
 
-    <!-- PHISHING -->
-    <section id="tab-phish" class="tab space-y-4">
-      <div data-reveal class="glass border border-slate-800 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-1">Phishing URL Intelligence</h2>
-        <p class="text-xs text-slate-400 mb-3">Heuristic analysis of the URL structure via Python backend logic.</p>
-        <div class="flex gap-2">
-          <input id="url-in" type="text" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="http://paypa1-secure-login.example.com/verify@account">
-          <button onclick="checkUrlBackend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-xl">Analyze</button>
-        </div>
-      </div>
-      <div id="url-out" data-reveal class="glass border border-slate-800 rounded-2xl p-5 text-xs text-slate-400">Enter a URL to analyze.</div>
-    </section>
+<!-- ================= ANALYTICS ================= -->
+<section id="page-analytics" class="page space-y-6">
+  <div class="card glass" data-r>
+    <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 4 · ANALYTICS</p>
+    <h1 class="text-2xl font-bold mt-1">Trends, distributions and risk scoring</h1>
+    <p class="text-sm text-slate-400 mt-2">Charts are computed from your scan history: activity over time, severity per scan, category radar and an overall risk score.</p>
+  </div>
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="card glass lg:col-span-2" data-r="left"><h2 class="text-sm font-semibold mb-3">Findings per scan (stacked by severity)</h2><div class="h-72"><canvas id="ch-stack"></canvas></div></div>
+    <div class="card glass" data-r="right"><h2 class="text-sm font-semibold mb-3">Risk score</h2><div class="h-52"><canvas id="ch-gauge"></canvas></div><p id="risk-text" class="text-center text-xs text-slate-400 -mt-6"></p></div>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="card glass" data-r><h2 class="text-sm font-semibold mb-3">Scans over time</h2><div class="h-64"><canvas id="ch-time"></canvas></div></div>
+    <div class="card glass" data-r><h2 class="text-sm font-semibold mb-3">Category radar</h2><div class="h-64"><canvas id="ch-radar"></canvas></div></div>
+  </div>
+</section>
 
-    <!-- GRAPH -->
-    <section id="tab-graph" class="tab">
-      <div data-reveal="zoom" class="glass border border-slate-800 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-3">Zero-Trust request graph</h2>
-        <div id="graph" class="w-full h-96 bg-slate-950 rounded-xl border border-slate-800"></div>
-        <p id="graph-msg" class="text-xs text-slate-500 mt-2"></p>
-      </div>
-    </section>
-  </main>
-</div>
+<!-- ================= GRAPH ================= -->
+<section id="page-graph" class="page space-y-6">
+  <div class="card glass" data-r>
+    <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 5 · TRUST GRAPH</p>
+    <h1 class="text-2xl font-bold mt-1">Zero-trust request path</h1>
+    <p class="text-sm text-slate-400 mt-2">Every request is authenticated, authorized against the organization, then processed. Click a node for its role.</p>
+  </div>
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="card glass lg:col-span-2" data-r="zoom"><div id="trust-graph" class="w-full h-96 bg-slate-950 rounded-xl border border-slate-800"></div></div>
+    <div class="card glass" data-r="right"><h2 class="text-sm font-semibold mb-2">Node detail</h2><p id="node-info" class="text-xs text-slate-400">Select a node in the graph.</p></div>
+  </div>
+</section>
 
-<footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500" data-reveal>SENTINEL demo · connected to Python FastAPI Backend</footer>
+<!-- ================= SEARCH ================= -->
+<section id="page-search" class="page space-y-6">
+  <div class="card glass" data-r>
+    <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 6 · SEARCH</p>
+    <h1 class="text-2xl font-bold mt-1">Search scans and findings</h1>
+    <p class="text-sm text-slate-400 mt-2">Filter by text, severity, category and status. Results can be read aloud with browser speech.</p>
+  </div>
+  <div class="card glass" data-r>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+      <input id="s-q" class="inp col-span-2 md:col-span-1" placeholder="Target or finding">
+      <select id="s-sev" class="inp"><option value="">All severities</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select>
+      <input id="s-cat" class="inp" placeholder="Category">
+      <select id="s-status" class="inp"><option value="">Any status</option><option>completed</option><option>running</option><option>queued</option><option>failed</option></select>
+      <button class="btn btn-c" id="s-go">Search</button>
+    </div>
+    <div class="flex items-center justify-between mt-4"><span id="s-count" class="text-xs text-slate-500"></span><button class="text-xs text-cyan-300 hover:text-cyan-200" id="s-speak">🔊 Read aloud</button></div>
+    <div id="s-out" class="mt-2 text-xs text-slate-300"></div>
+  </div>
+</section>
+
+<!-- ================= CHAT ================= -->
+<section id="page-chat" class="page space-y-6">
+  <div class="card glass" data-r>
+    <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 7 · TEAM CHAT</p>
+    <h1 class="text-2xl font-bold mt-1">Direct messages with teammates</h1>
+    <p class="text-sm text-slate-400 mt-2">Persisted messages over REST with live delivery through WebSocket.</p>
+  </div>
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="card glass" data-r="left"><div class="flex gap-2"><input id="c-find" class="inp" placeholder="Find teammate by email"><button class="btn btn-p" id="c-find-btn">Find</button></div><div id="c-users" class="mt-3 space-y-1"></div></div>
+    <div class="card glass lg:col-span-2" data-r="right">
+      <div class="flex justify-between mb-2"><span id="c-with" class="text-xs text-cyan-300">Select a teammate.</span><span id="c-state" class="text-xs text-slate-500">Offline</span></div>
+      <div id="c-msgs" class="h-64 overflow-y-auto bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2 text-xs"></div>
+      <div class="flex gap-2 mt-3"><input id="c-in" class="inp" placeholder="Write a message"><button class="btn btn-p" id="c-send">Send</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ACCOUNT ================= -->
+<section id="page-account" class="page space-y-6">
+  <div class="card glass" data-r>
+    <p class="text-[11px] tracking-widest text-indigo-300 font-semibold">PAGE 8 · ACCOUNT</p>
+    <h1 class="text-2xl font-bold mt-1">Sign in or create an organization</h1>
+    <p class="text-sm text-slate-400 mt-2">Registration creates your organization and makes you its owner. Passwords need at least 12 characters.</p>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="card glass space-y-2" data-r="left">
+      <h2 class="text-sm font-semibold">Credentials</h2>
+      <input id="a-email" type="email" class="inp" placeholder="email">
+      <input id="a-pass" type="password" class="inp" placeholder="password (12+ chars)">
+      <input id="a-org" class="inp" placeholder="organization name (register only)">
+      <div class="flex gap-2 pt-1"><button class="btn btn-p" id="a-login">Log in</button><button class="btn btn-s" id="a-reg">Register</button><button class="btn btn-s" id="a-out">Log out</button></div>
+    </div>
+    <div class="card glass" data-r="right"><h2 class="text-sm font-semibold mb-2">Session</h2><div id="a-info" class="text-xs text-slate-400">Signed out.</div></div>
+  </div>
+</section>
+
+</main>
+<footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">SENTINEL · authenticated, organization-scoped security analysis · heuristic results are not proof of safety</footer>
 
 <script>
 document.documentElement.classList.add('js');
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {} };
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const icons=()=>{try{window.lucide&&lucide.createIcons()}catch(e){}};
+const SEV=['critical','high','medium','low'];
+const SEVCOL={critical:'#f43f5e',high:'#fb923c',medium:'#fbbf24',low:'#38bdf8'};
+let token=localStorage.getItem('sentinel_access_token')||'', refreshTok=localStorage.getItem('sentinel_refresh_token')||'', user=null;
 
-/* ---------- Scroll animation ---------- */
-let io = null;
-function observeReveals(root) {
-  const els = (root || document).querySelectorAll('[data-reveal]:not(.in)');
-  if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
-  if (!io) io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-  els.forEach((e) => io.observe(e));
-}
-function onScroll() {
-  const h = document.documentElement;
-  const max = h.scrollHeight - h.clientHeight;
-  $('progress').style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
-}
-addEventListener('scroll', onScroll, { passive: true });
-
-/* ---------- Toasts ---------- */
-function toast(msg, color) {
-  const t = document.createElement('div');
-  t.className = 'pointer-events-auto glass border border-slate-700 text-xs px-4 py-2.5 rounded-xl shadow-xl transition-all duration-300 opacity-0 translate-y-2 ' + (color || 'text-slate-100');
-  t.textContent = msg;
-  $('toasts').appendChild(t);
-  requestAnimationFrame(() => t.classList.remove('opacity-0', 'translate-y-2'));
-  setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 300); }, 3000);
-}
-
-/* ---------- Tabs ---------- */
-let graphNet = null;
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.id === 'tab-' + name));
-  document.querySelectorAll('.navbtn').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
-  const sec = $('tab-' + name);
-  sec.querySelectorAll('[data-reveal]').forEach((e) => e.classList.remove('in'));
-  observeReveals(sec);
-  if (name === 'graph') drawGraph();
-  if (name === 'overview') animateBars();
-  scrollTo({ top: 0, behavior: 'smooth' });
-}
-document.querySelectorAll('.navbtn').forEach((b) => b.addEventListener('click', () => switchTab(b.dataset.tab)));
-
-/* ---------- Overview ---------- */
-const state = { blocked: 1284, secrets: 0, apis: 0, phish: 0 };
-const cats = [['Credential stuffing', 72, 'bg-rose-500'], ['Phishing links', 58, 'bg-amber-500'], ['Broken auth (BOLA)', 41, 'bg-indigo-500'], ['Leaked secrets', 29, 'bg-cyan-500'], ['Rate-limit abuse', 17, 'bg-emerald-500']];
-function renderCats() {
-  $('cats').innerHTML = cats.map((c) => '<div><div class="flex justify-between text-xs mb-1"><span>' + c[0] + '</span><span class="text-slate-400">' + c[1] + '%</span></div><div class="h-2 bg-slate-800 rounded-full overflow-hidden"><div class="bar h-full ' + c[2] + ' rounded-full" data-w="' + c[1] + '" style="width:0"></div></div></div>').join('');
-}
-function animateBars() { setTimeout(() => document.querySelectorAll('.bar').forEach((b) => { b.style.width = b.dataset.w + '%'; }), 150); }
-function countTo(id, to) {
-  const el = $(id), from = parseInt(el.textContent.replace(/,/g, ''), 10) || 0, t0 = performance.now();
-  (function step(t) {
-    const p = Math.min((t - t0) / 900, 1);
-    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))).toLocaleString();
-    if (p < 1) requestAnimationFrame(step);
-  })(t0);
-}
-function refreshKpis() { countTo('k-blocked', state.blocked); countTo('k-secrets', state.secrets); countTo('k-apis', state.apis); countTo('k-phish', state.phish); }
-function log(msg, tone) {
-  const li = document.createElement('li');
-  li.className = 'flex gap-2 items-start border-l-2 pl-3 py-1 ' + (tone === 'bad' ? 'border-rose-500' : tone === 'warn' ? 'border-amber-500' : 'border-emerald-500');
-  li.innerHTML = '<span class="text-slate-500 shrink-0">' + new Date().toLocaleTimeString() + '</span><span>' + esc(msg) + '</span>';
-  $('feed').prepend(li);
-}
-
-/* ---------- Backend Integration Functions ---------- */
-async function runBackendScan(targetUrl, sourceCode) {
-  try {
-    toast('Submitting scan to Python backend...');
-
-    const response = await fetch('/scans', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        target_url: targetUrl || "http://example.com",
-        authorized: true,
-        source_code: sourceCode || null
-      })
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.detail || 'Scan creation failed');
-    }
-
-    const data = await response.json();
-    const scanId = data.scan_id;
-    toast('Scan queued. Processing in Python backend...');
-
-    let completed = false;
-    let results = null;
-
-    while (!completed) {
-      await new Promise(r => setTimeout(r, 1000));
-      const statusRes = await fetch(`/scans/${scanId}`);
-      const statusData = await statusRes.json();
-
-      if (statusData.status === 'completed') {
-        const resultsRes = await fetch(`/scans/${scanId}/results`);
-        results = await resultsRes.json();
-        completed = true;
-      } else if (statusData.status === 'failed') {
-        throw new Error('Scan execution failed on server.');
-      }
-    }
-
-    toast(`Scan complete! Found ${results.total_findings} issue(s)`, 'text-emerald-400');
-    return results;
-
-  } catch (err) {
-    toast('Error: ' + err.message, 'text-rose-400');
-    console.error(err);
-    return null;
+/* ---------- API ---------- */
+async function api(url,opt={}){
+  opt.headers=Object.assign({},opt.headers||{},token?{Authorization:'Bearer '+token}:{});
+  let r=await fetch(url,opt);
+  if(r.status===401&&refreshTok&&!url.includes('/auth/')){
+    const rr=await fetch('/api/v1/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh_token:refreshTok})});
+    if(rr.ok){setAuth(await rr.json(),true);opt.headers.Authorization='Bearer '+token;r=await fetch(url,opt)}
   }
+  return r;
 }
+const jpost=(u,b)=>api(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
 
-function sampleRepo() {
-  $('repo-in').value = 'const api_key = "sk_live_51H8abcdEFGH1234";\nconst password = "admin123";\naws = "AKIAIOSFODNN7EXAMPLE";\n';
+/* ---------- Toast / reveal / progress ---------- */
+function toast(m,c){const t=document.createElement('div');t.className='pointer-events-auto glass border border-slate-700 text-xs px-4 py-2.5 rounded-xl shadow-xl transition-all duration-300 opacity-0 translate-y-2 '+(c||'text-slate-100');t.textContent=m;$('toasts').appendChild(t);requestAnimationFrame(()=>t.classList.remove('opacity-0','translate-y-2'));setTimeout(()=>{t.classList.add('opacity-0');setTimeout(()=>t.remove(),300)},3200)}
+let io=null;
+function reveal(root){
+  const els=(root||document).querySelectorAll('[data-r]:not(.in)');
+  if(!('IntersectionObserver' in window)){els.forEach(e=>e.classList.add('in'));return}
+  io=io||new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}}),{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+  els.forEach(e=>io.observe(e));
 }
+addEventListener('scroll',()=>{const h=document.documentElement,m=h.scrollHeight-h.clientHeight;$('progress').style.width=(m>0?h.scrollTop/m*100:0)+'%'},{passive:true});
+function countTo(id,to){const el=$(id),from=parseInt(el.textContent.replace(/,/g,''),10)||0,t0=performance.now();(function s(t){const p=Math.min((t-t0)/900,1);el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-p,3))).toLocaleString();if(p<1)requestAnimationFrame(s)})(t0)}
 
-async function scanRepoBackend() {
-  const code = $('repo-in').value;
-  if (!code.trim()) { toast('Paste some code first', 'text-amber-400'); return; }
-  
-  toast('Sending code to backend for analysis...');
-  const results = await runBackendScan('http://local-repo-target.com', code);
-  
-  if (!results) return;
-
-  const found = results.findings;
-  const col = { high: 'text-rose-400', medium: 'text-amber-400', low: 'text-sky-400' };
-  
-  $('repo-out').innerHTML = found.length
-    ? '<p class="text-sm font-semibold text-white mb-3">' + found.length + ' issue(s) found by Python backend</p>' + found.map((f) => '<div class="border border-slate-800 rounded-xl p-3 mb-2"><span class="font-semibold ' + (col[f.severity.toLowerCase()] || 'text-slate-300') + '">' + f.severity.toUpperCase() + '</span> · ' + esc(f.title) + '<p class="mt-1 text-slate-400">' + esc(f.description) + '</p></div>').join('')
-    : '<p class="text-emerald-400 font-semibold">No issues detected by backend scanner.</p>';
-  
-  state.secrets += found.length; 
-  refreshKpis();
-  log('Python backend repo scan finished: ' + found.length + ' issue(s)', found.length ? 'warn' : 'ok');
-}
-
-/* ---------- API analyzer ---------- */
-const endpoints = [
-  { p: 'GET /v1/users/{id}', auth: true, tls: true, rl: true },
-  { p: 'POST /v1/login', auth: false, tls: true, rl: false },
-  { p: 'GET /v1/admin/export', auth: false, tls: true, rl: false },
-  { p: 'PUT /v1/orders/{id}', auth: true, tls: true, rl: false },
-  { p: 'GET /health', auth: false, tls: false, rl: true }
+/* ---------- Data ---------- */
+const now=Date.now(), iso=d=>new Date(now-d*864e5).toISOString();
+const f=(title,severity,category)=>({title,severity,category,description:''});
+const DEMO=[
+ {scan_id:'demo-1',target:'http://paypa1-secure-login-update.example.com',status:'completed',created_at:iso(6),findings:[f('HTTPS not detected','medium','Transport Security'),f('Unusual domain structure','medium','Phishing Analysis'),f('Suspicious URL keyword','low','Phishing Analysis')]},
+ {scan_id:'demo-2',target:'https://api.acme.io',status:'completed',created_at:iso(5),findings:[f('Possible API key','high','Exposed Secrets'),f('Possible secret token','high','Exposed Secrets'),f('Rate-limit policy not evident','medium','API Protection')]},
+ {scan_id:'demo-3',target:'https://shop.example.org',status:'completed',created_at:iso(4),findings:[f('Rate-limit policy not evident','medium','API Protection')]},
+ {scan_id:'demo-4',target:'http://wallet-verify.example.net',status:'completed',created_at:iso(2),findings:[f('HTTPS not detected','medium','Transport Security'),f('Suspicious URL keyword','low','Phishing Analysis'),f('Possible private key','high','Exposed Secrets')]},
+ {scan_id:'demo-5',target:'https://internal.example.com',status:'completed',created_at:iso(1),findings:[]},
 ];
-function scanApis() {
-  let risky = 0;
-  $('api-rows').innerHTML = endpoints.map((e) => {
-    const s = (e.auth ? 0 : 3) + (e.tls ? 0 : 2) + (e.rl ? 0 : 1);
-    const lvl = s >= 4 ? ['Critical', 'text-rose-400'] : s >= 2 ? ['Medium', 'text-amber-400'] : ['Low', 'text-emerald-400'];
-    if (s >= 2) risky++;
-    const y = (v) => v ? '<span class="text-emerald-400">Yes</span>' : '<span class="text-rose-400">No</span>';
-    return '<tr class="border-t border-slate-800"><td class="py-2.5 pr-3 font-mono">' + e.p + '</td><td>' + y(e.auth) + '</td><td>' + y(e.tls) + '</td><td>' + y(e.rl) + '</td><td class="font-semibold ' + lvl[1] + '">' + lvl[0] + '</td></tr>';
-  }).join('');
-  state.apis = risky; refreshKpis();
-  log('API analysis: ' + risky + ' endpoint(s) need attention', risky ? 'warn' : 'ok');
+const CATS=[['Credential stuffing',72,'bg-rose-500'],['Phishing links',58,'bg-amber-500'],['Broken auth (BOLA)',41,'bg-indigo-500'],['Leaked secrets',29,'bg-cyan-500'],['Rate-limit abuse',17,'bg-emerald-500']];
+const ENDPOINTS=[{p:'GET /v1/users/{id}',a:1,t:1,r:1},{p:'POST /v1/login',a:0,t:1,r:0},{p:'GET /v1/admin/export',a:0,t:1,r:0},{p:'PUT /v1/orders/{id}',a:1,t:1,r:0},{p:'GET /health',a:0,t:0,r:1}];
+let rows=DEMO, live=false;
+
+async function loadRows(){
+  if(token){
+    try{const r=await api('/api/v1/search');if(r.ok){rows=(await r.json()).results;live=true;return}}catch(e){}
+  }
+  rows=DEMO;live=false;
+}
+function stats(rs){
+  const sev={critical:0,high:0,medium:0,low:0},cat={};let total=0;
+  rs.forEach(r=>r.findings.forEach(x=>{total++;sev[x.severity]=(sev[x.severity]||0)+1;cat[x.category]=(cat[x.category]||0)+1}));
+  return{sev,cat,total,secrets:cat['Exposed Secrets']||0};
 }
 
-/* ---------- Phishing ---------- */
-async function checkUrlBackend() {
-  const raw = $('url-in').value.trim();
-  if (!raw) { toast('Enter a URL', 'text-amber-400'); return; }
-  
-  const results = await runBackendScan(raw, null);
-  if (!results) return;
+/* ---------- Charts ---------- */
+const charts={};
+Chart.defaults.color='#94a3b8';Chart.defaults.borderColor='rgba(51,65,85,.5)';Chart.defaults.font.size=11;
+function chart(id,cfg){if(charts[id])charts[id].destroy();const el=$(id);if(!el)return;cfg.options=Object.assign({responsive:true,maintainAspectRatio:false},cfg.options||{});charts[id]=new Chart(el,cfg)}
+const PAL=['#6366f1','#22d3ee','#10b981','#f59e0b','#f43f5e','#a78bfa'];
 
-  const findings = results.findings;
-  $('url-out').innerHTML = findings.length
-    ? '<p class="text-sm font-semibold text-rose-400">Potential risks flagged by backend</p>' + '<ul class="list-disc pl-5 space-y-1 text-slate-300 mt-2">' + findings.map((f) => '<li><b>' + esc(f.title) + '</b>: ' + esc(f.description) + '</li>').join('') + '</ul>'
-    : '<p class="text-emerald-400 font-semibold">No red flags found by backend URL analyzer.</p>';
-  
-  if (findings.length > 0) { state.phish++; refreshKpis(); }
-  log('URL checked via backend: ' + raw, findings.length ? 'warn' : 'ok');
+function renderOverview(){
+  const s=stats(rows);
+  countTo('k-scans',rows.length);countTo('k-findings',s.total);countTo('k-high',s.sev.critical+s.sev.high);countTo('k-secrets',s.secrets);
+  chart('ch-sev',{type:'doughnut',data:{labels:SEV,datasets:[{data:SEV.map(k=>s.sev[k]),backgroundColor:SEV.map(k=>SEVCOL[k]),borderWidth:0}]},options:{cutout:'65%',plugins:{legend:{position:'bottom'}}}});
+  const cl=Object.keys(s.cat);
+  chart('ch-cat',{type:'bar',data:{labels:cl,datasets:[{label:'Findings',data:cl.map(k=>s.cat[k]),backgroundColor:PAL,borderRadius:8}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+  $('cats').innerHTML=CATS.map(c=>'<div><div class="flex justify-between text-xs mb-1"><span>'+c[0]+'</span><span class="text-slate-400">'+c[1]+'%</span></div><div class="h-2 bg-slate-800 rounded-full overflow-hidden"><div class="bar h-full '+c[2]+' rounded-full" data-w="'+c[1]+'" style="width:0"></div></div></div>').join('');
+  setTimeout(()=>document.querySelectorAll('.bar').forEach(b=>b.style.width=b.dataset.w+'%'),200);
+  $('api-rows').innerHTML=ENDPOINTS.map(e=>{const sc=(e.a?0:3)+(e.t?0:2)+(e.r?0:1),l=sc>=4?['Critical','sev-critical']:sc>=2?['Medium','sev-medium']:['Low','sev-low'];const y=v=>v?'<span class="text-emerald-400">Yes</span>':'<span class="text-rose-400">No</span>';return'<tr class="border-t border-slate-800"><td class="py-2.5 pr-3 font-mono">'+esc(e.p)+'</td><td>'+y(e.a)+'</td><td>'+y(e.t)+'</td><td>'+y(e.r)+'</td><td class="font-semibold '+l[1]+'">'+l[0]+'</td></tr>'}).join('');
+  $('feed').innerHTML='';rows.slice(0,8).forEach(r=>feed(r.target+' → '+r.findings.length+' finding(s)',r.findings.length?'warn':'ok',r.created_at));
+}
+function feed(msg,tone,when){const li=document.createElement('li');li.className='flex gap-2 items-start border-l-2 pl-3 py-1 '+(tone==='bad'?'border-rose-500':tone==='warn'?'border-amber-500':'border-emerald-500');li.innerHTML='<span class="text-slate-500 shrink-0">'+new Date(when||Date.now()).toLocaleTimeString()+'</span><span>'+esc(msg)+'</span>';$('feed').prepend(li)}
+
+function renderScans(){
+  $('scan-rows').innerHTML=rows.length?rows.map(r=>'<tr class="border-t border-slate-800 hover:bg-slate-900/60 cursor-pointer" data-id="'+esc(r.scan_id)+'"><td class="py-2.5 pr-2 max-w-[220px] truncate">'+esc(r.target)+'</td><td>'+esc(r.status)+'</td><td>'+r.findings.length+'</td><td class="text-slate-500">'+new Date(r.created_at).toLocaleDateString()+'</td></tr>').join(''):'<tr><td class="py-3 text-slate-500">No scans yet.</td></tr>';
+  document.querySelectorAll('#scan-rows tr[data-id]').forEach(tr=>tr.onclick=()=>showScan(tr.dataset.id));
+}
+let detailNet=null;
+async function showScan(id){
+  const r=rows.find(x=>x.scan_id===id);if(!r)return;
+  $('sd-title').textContent=r.target;
+  $('sd-body').innerHTML=r.findings.length?r.findings.map(x=>'<div class="border border-slate-800 rounded-xl p-2 mb-2"><b class="sev-'+esc(x.severity)+'">'+esc(x.severity.toUpperCase())+'</b> · '+esc(x.title)+'<div class="text-slate-500">'+esc(x.category)+'</div></div>').join(''):'<span class="text-emerald-400">No findings.</span>';
+  const g=$('sd-graph');g.classList.remove('hidden');
+  const nodes=[{id:'t',label:'Target',color:'#6366f1'}].concat(r.findings.map((x,i)=>({id:i,label:x.title,color:SEVCOL[x.severity]||'#94a3b8'})));
+  const edges=r.findings.map((x,i)=>({from:'t',to:i,color:'#475569'}));
+  const data={nodes:new vis.DataSet(nodes.map(n=>Object.assign(n,{shape:'dot',size:14,font:{color:'#e2e8f0',size:10}}))),edges:new vis.DataSet(edges)};
+  if(detailNet)detailNet.destroy();detailNet=new vis.Network(g,data,{physics:{stabilization:true}});
 }
 
-/* ---------- Graph ---------- */
-function drawGraph() {
-  const box = $('graph');
-  if (typeof vis === 'undefined') { $('graph-msg').textContent = 'Graph library failed to load.'; return; }
-  if (graphNet) { graphNet.redraw(); graphNet.fit(); return; }
-  const n = (id, label, color) => ({ id, label, color: { background: color, border: '#1e293b' }, font: { color: '#e2e8f0', size: 12 }, shape: 'dot', size: 18 });
-  const nodes = new vis.DataSet([n(1, 'Client', '#6366f1'), n(2, 'FastAPI Gateway', '#22d3ee'), n(3, 'Policy Engine', '#f59e0b'), n(4, 'Auth Service', '#10b981')]);
-  const edges = new vis.DataSet([[1, 2], [2, 3], [3, 4]].map((e) => ({ from: e[0], to: e[1], arrows: 'to', color: '#475569' })));
-  graphNet = new vis.Network(box, { nodes, edges }, { physics: { stabilization: true }, interaction: { hover: true } });
-  $('graph-msg').textContent = 'Zero-trust graph active. Connected to backend router.';
+function renderAnalytics(){
+  const sorted=[...rows].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const labels=sorted.map((r,i)=>(r.target.replace(/^https?:\/\//,'').slice(0,16)));
+  chart('ch-stack',{type:'bar',data:{labels,datasets:SEV.map(k=>({label:k,backgroundColor:SEVCOL[k],data:sorted.map(r=>r.findings.filter(x=>x.severity===k).length),borderRadius:4}))},options:{scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}});
+  const s=stats(rows),w={critical:10,high:6,medium:3,low:1},score=Math.min(100,Math.round(SEV.reduce((a,k)=>a+s.sev[k]*w[k],0)*100/Math.max(1,rows.length*12)));
+  chart('ch-gauge',{type:'doughnut',data:{datasets:[{data:[score,100-score],backgroundColor:[score>60?'#f43f5e':score>30?'#fbbf24':'#10b981','#1e293b'],borderWidth:0}]},options:{rotation:-90,circumference:180,cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+  $('risk-text').innerHTML='<b class="text-2xl text-white">'+score+'</b>/100 · '+(score>60?'High risk':score>30?'Moderate':'Low');
+  const byDay={};rows.forEach(r=>{const d=new Date(r.created_at).toLocaleDateString();byDay[d]=(byDay[d]||0)+1});
+  const dl=Object.keys(byDay);
+  chart('ch-time',{type:'line',data:{labels:dl,datasets:[{label:'Scans',data:dl.map(k=>byDay[k]),borderColor:'#22d3ee',backgroundColor:'rgba(34,211,238,.15)',fill:true,tension:.35,pointRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+  const cl=Object.keys(s.cat);
+  chart('ch-radar',{type:'radar',data:{labels:cl.length?cl:['—'],datasets:[{label:'Findings',data:cl.length?cl.map(k=>s.cat[k]):[0],borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.25)'}]},options:{plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,ticks:{precision:0,backdropColor:'transparent'},grid:{color:'rgba(51,65,85,.6)'}}}}});
 }
 
-/* ---------- Init ---------- */
-renderCats(); scanApis();
-log('SENTINEL initialized and connected to Python backend', 'ok');
-icons();
-observeReveals(document);
-animateBars();
-refreshKpis();
-onScroll();
+let trustNet=null;
+const NODES={1:['Client','Browser or API consumer. Sends a bearer access token on every request.'],2:['FastAPI Gateway','Applies body-size limits, CORS allow-list and routes to /api/v1.'],3:['Policy Engine','Enforces organization-scoped access on every scan, search and message.'],4:['Auth Service','Salted scrypt hashing, 15-minute access tokens, rotating 7-day refresh tokens.'],5:['Scan Worker','Runs the heuristics in scanner.py and stores results.'],6:['Storage','Identity, scans, sessions and messages (SQLite interim, PostgreSQL planned).']};
+function renderTrust(){
+  const box=$('trust-graph');if(typeof vis==='undefined'){box.textContent='Graph library failed to load.';return}
+  if(trustNet){trustNet.fit();return}
+  const cols=['#6366f1','#22d3ee','#f59e0b','#10b981','#a78bfa','#f43f5e'];
+  const nodes=new vis.DataSet(Object.keys(NODES).map((k,i)=>({id:+k,label:NODES[k][0],shape:'dot',size:20,color:{background:cols[i],border:'#1e293b'},font:{color:'#e2e8f0',size:12}})));
+  const edges=new vis.DataSet([[1,2],[2,3],[3,4],[3,5],[5,6],[4,6]].map(e=>({from:e[0],to:e[1],arrows:'to',color:'#475569'})));
+  trustNet=new vis.Network(box,{nodes,edges},{physics:{stabilization:true},interaction:{hover:true}});
+  trustNet.on('click',p=>{if(p.nodes.length){const n=NODES[p.nodes[0]];$('node-info').innerHTML='<b class="text-white">'+n[0]+'</b><br>'+n[1]}});
+}
+
+/* ---------- Search + speech ---------- */
+async function doSearch(){
+  const p=new URLSearchParams({q:$('s-q').value,severity:$('s-sev').value,category:$('s-cat').value,status:$('s-status').value});
+  let res;
+  if(token){const r=await api('/api/v1/search?'+p);if(!r.ok){toast('Search failed','text-rose-400');return}res=(await r.json()).results}
+  else{const q=$('s-q').value.toLowerCase();res=DEMO.map(r=>Object.assign({},r,{findings:r.findings.filter(x=>(!$('s-sev').value||x.severity===$('s-sev').value)&&(!$('s-cat').value||x.category===$('s-cat').value))})).filter(r=>(!$('s-status').value||r.status===$('s-status').value)&&(!q||(r.target+JSON.stringify(r.findings)).toLowerCase().includes(q)))}
+  $('s-count').textContent=res.length+' scan(s)'+(token?'':' · sample data');
+  $('s-out').innerHTML=res.length?res.map(x=>'<div class="border-t border-slate-800 py-2"><b class="text-slate-100">'+esc(x.target)+'</b> · '+esc(x.status)+' · '+x.findings.length+' finding(s)'+(x.findings.length?'<div class="text-slate-500">'+x.findings.map(y=>esc(y.title)).join(', ')+'</div>':'')+'</div>').join(''):'No matching scans.';
+}
+function speak(t){if(!('speechSynthesis' in window)){toast('Speech not supported','text-amber-400');return}speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t))}
+
+/* ---------- Scanner ---------- */
+async function runScan(){
+  const url=$('sc-url').value.trim();if(!url){toast('Enter a target URL','text-amber-400');return}
+  if(!token){toast('Sign in to run real scans','text-amber-400');location.hash='#/account';return}
+  let headers=null;const h=$('sc-headers').value.trim();
+  if(h){try{headers=JSON.parse(h)}catch(e){toast('Headers must be valid JSON','text-rose-400');return}}
+  $('sc-out').textContent='Submitting…';
+  try{
+    const r=await jpost('/api/v1/scans',{target_url:url,source_code:$('sc-code').value||null,response_headers:headers});
+    if(!r.ok){const e=await r.json();throw new Error(typeof e.detail==='string'?e.detail:'Invalid request')}
+    const id=(await r.json()).scan_id;let res=null;
+    for(let i=0;i<30&&!res;i++){
+      await new Promise(x=>setTimeout(x,800));
+      const s=await (await api('/api/v1/scans/'+id)).json();
+      if(s.status==='completed')res=await (await api('/api/v1/scans/'+id+'/results')).json();
+      else if(s.status==='failed')throw new Error('Scan failed on server');
+    }
+    if(!res)throw new Error('Scan timed out');
+    $('sc-out').innerHTML='<p class="text-sm font-semibold text-white mb-2">'+res.total_findings+' finding(s)</p>'+(res.findings.map(x=>'<div class="border border-slate-800 rounded-xl p-3 mb-2"><b class="sev-'+esc(x.severity)+'">'+esc(x.severity.toUpperCase())+'</b> · '+esc(x.title)+'<p class="text-slate-400 mt-1">'+esc(x.description)+'</p></div>').join('')||'<p class="text-emerald-400">No issues detected. This is not proof the asset is safe.</p>');
+    const c={};res.findings.forEach(x=>c[x.severity]=(c[x.severity]||0)+1);
+    $('sc-chart-wrap').classList.remove('hidden');
+    chart('ch-scan',{type:'bar',data:{labels:Object.keys(c),datasets:[{data:Object.values(c),backgroundColor:Object.keys(c).map(k=>SEVCOL[k]),borderRadius:8}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{precision:0}}}}});
+    toast('Scan complete','text-emerald-400');await refresh();
+  }catch(e){$('sc-out').textContent='';toast('Error: '+e.message,'text-rose-400')}
+}
+
+/* ---------- Auth ---------- */
+function setAuth(d,quiet){token=d.access_token;refreshTok=d.refresh_token||refreshTok;user=d.user;localStorage.setItem('sentinel_access_token',token);localStorage.setItem('sentinel_refresh_token',refreshTok);uiAuth();if(!quiet)toast('Authenticated','text-emerald-400')}
+function uiAuth(){
+  $('user-chip').textContent=user?user.email:'Sign in';
+  $('a-info').innerHTML=user?'<b class="text-white">'+esc(user.email)+'</b><br>Role: '+esc(user.role)+'<br>Organization: <span class="font-mono">'+esc(user.organization_id)+'</span>':'Signed out.';
+  $('data-badge').style.display=user?'none':'';
+}
+async function authCall(path,body){const r=await jpost(path,body);if(!r.ok){let m='Request failed';try{const e=await r.json();if(typeof e.detail==='string')m=e.detail}catch(_){}toast(m,'text-rose-400');return}setAuth(await r.json());await refresh();location.hash='#/overview'}
+async function logout(){if(token)await api('/api/v1/auth/logout',{method:'POST'});token='';refreshTok='';user=null;localStorage.removeItem('sentinel_access_token');localStorage.removeItem('sentinel_refresh_token');uiAuth();await refresh();toast('Signed out')}
+
+/* ---------- Chat ---------- */
+let chatUser=null,sock=null;
+async function findUsers(){if(!token){toast('Log in first','text-amber-400');return}const d=await (await api('/api/v1/chat/users?q='+encodeURIComponent($('c-find').value))).json();const box=$('c-users');box.innerHTML='';d.users.forEach(u=>{const b=document.createElement('button');b.className='block w-full text-left text-xs text-cyan-300 hover:text-white py-1';b.textContent=u.email;b.onclick=()=>openChat(u.id,u.email);box.appendChild(b)});if(!d.users.length)box.innerHTML='<span class="text-xs text-slate-500">No users found.</span>'}
+function msg(m){const b=document.createElement('div');const me=m.sender_id===user.id;b.className='rounded-lg px-2 py-1 '+(me?'bg-indigo-900/50 ml-8':'bg-slate-800 mr-8');b.textContent=(me?'You: ':'Them: ')+m.body;$('c-msgs').appendChild(b);$('c-msgs').scrollTop=1e9}
+async function openChat(id,email){
+  chatUser={id,email};$('c-with').textContent='Chatting with '+email;$('c-msgs').innerHTML='';
+  (await (await api('/api/v1/chat/'+id+'/messages')).json()).messages.forEach(msg);
+  if(sock)sock.close();
+  sock=new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/api/v1/chat/ws/'+user.id+'?token='+encodeURIComponent(token));
+  sock.onopen=()=>$('c-state').textContent='Live';sock.onclose=()=>$('c-state').textContent='REST fallback';
+  sock.onmessage=e=>{const m=JSON.parse(e.data);if((m.sender_id===id&&m.recipient_id===user.id)||(m.sender_id===user.id&&m.recipient_id===id))msg(m)};
+}
+async function send(){if(!chatUser||!token){toast('Select a teammate and log in','text-amber-400');return}const body=$('c-in').value.trim();if(!body)return;const r=await jpost('/api/v1/chat/'+chatUser.id+'/messages',{body});if(r.ok)$('c-in').value='';else toast('Message failed','text-rose-400')}
+
+/* ---------- Router ---------- */
+const PAGES=[['overview','Overview','layout-dashboard'],['scanner','Scanner','radar'],['scans','Scans','list'],['analytics','Analytics','bar-chart-3'],['graph','Trust Graph','network'],['search','Search','search'],['chat','Chat','messages-square'],['account','Account','user']];
+const navHtml=PAGES.map(p=>'<a href="#/'+p[0]+'" data-p="'+p[0]+'"><i data-lucide="'+p[2]+'" class="w-3.5 h-3.5"></i>'+p[1]+'</a>').join('');
+$('nav-desktop').innerHTML=navHtml;$('nav-mobile').innerHTML=navHtml;
+function route(){
+  const name=(location.hash.replace('#/','')||'overview');const key=PAGES.some(p=>p[0]===name)?name:'overview';
+  document.querySelectorAll('.page').forEach(p=>{p.classList.toggle('active',p.id==='page-'+key);});
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.dataset.p===key));
+  const sec=$('page-'+key);sec.querySelectorAll('[data-r]').forEach(e=>e.classList.remove('in'));
+  scrollTo({top:0});requestAnimationFrame(()=>reveal(sec));
+  if(key==='overview')renderOverview();
+  if(key==='scans')renderScans();
+  if(key==='analytics')renderAnalytics();
+  if(key==='graph')setTimeout(renderTrust,50);
+  if(key==='search')doSearch();
+}
+async function refresh(){await loadRows();$('data-badge').style.display=live?'none':'';route()}
+addEventListener('hashchange',route);
+
+/* ---------- Wire up ---------- */
+$('sc-run').onclick=runScan;
+$('sc-sample').onclick=()=>{$('sc-url').value='http://paypa1-secure-login.example.com/verify';$('sc-code').value='const api_key = "sk_live_51H8abcdEFGH1234";\nconst secret = "supersecretvalue99";\n';$('sc-headers').value='{"Content-Type":"application/json"}'};
+$('s-go').onclick=doSearch;$('s-speak').onclick=()=>{const t=$('s-out').innerText.trim();if(t)speak(t)};
+$('a-login').onclick=()=>authCall('/api/v1/auth/login',{email:$('a-email').value,password:$('a-pass').value});
+$('a-reg').onclick=()=>authCall('/api/v1/auth/register',{email:$('a-email').value,password:$('a-pass').value,organization_name:$('a-org').value});
+$('a-out').onclick=logout;
+$('c-find-btn').onclick=findUsers;$('c-send').onclick=send;$('c-in').onkeydown=e=>{if(e.key==='Enter')send()};
+
+(async function init(){
+  if(token){const r=await api('/api/v1/auth/me');if(r.ok)user=await r.json();else{token='';localStorage.removeItem('sentinel_access_token')}}
+  uiAuth();await loadRows();$('data-badge').style.display=live?'none':'';icons();route();icons();
+})();
 </script>
 </body>
 </html>
