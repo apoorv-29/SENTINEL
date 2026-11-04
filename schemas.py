@@ -1,28 +1,66 @@
-"""
-schemas.py - the "shape" of the data going in and out of the API.
-
-Pydantic models do two jobs for us:
-  1. Validate incoming requests (e.g. reject a bad URL automatically).
-  2. Describe our responses, so FastAPI's /docs page shows them clearly.
-
-The field names and order here match the JSON the API already returned,
-so your frontend teammate's code keeps working unchanged.
-"""
-
 from typing import Optional
-from pydantic import BaseModel, HttpUrl
+
+from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, field_validator
 
 
-# ---------- Request ----------
+class RegisterRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=12, max_length=128)
+    organization_name: str = Field(min_length=2, max_length=120)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        value = value.strip().lower()
+        if "@" not in value or value.startswith("@") or value.endswith("@"):
+            raise ValueError("invalid email")
+        return value
+
+
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    email: str
+    password: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return value.strip().lower()
+
+
+class RefreshRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    refresh_token: str = Field(min_length=20)
+
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    organization_id: str
+    role: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
 
 class ScanRequest(BaseModel):
-    target_url: HttpUrl
-    authorized: bool
-    source_code: Optional[str] = None
+    model_config = ConfigDict(extra="ignore")
+    target_url: AnyHttpUrl
+    source_code: Optional[str] = Field(default=None, max_length=200_000)
     response_headers: Optional[dict[str, str]] = None
 
+    @field_validator("response_headers")
+    @classmethod
+    def limit_headers(cls, value: Optional[dict[str, str]]) -> Optional[dict[str, str]]:
+        if value is not None and (len(value) > 100 or any(len(k) > 256 or len(v) > 8192 for k, v in value.items())):
+            raise ValueError("response headers exceed limits")
+        return value
 
-# ---------- Simple responses ----------
 
 class HomeResponse(BaseModel):
     message: str
@@ -40,8 +78,6 @@ class ScanStatusResponse(BaseModel):
     status: str
 
 
-# ---------- Scan results (nested pieces first, then the whole thing) ----------
-
 class Finding(BaseModel):
     title: str
     severity: str
@@ -53,7 +89,6 @@ class GraphNode(BaseModel):
     id: str
     label: str
     severity: str
-    # The central "target" node has no category, so this stays optional.
     category: Optional[str] = None
 
 
@@ -73,20 +108,15 @@ class ScanResults(BaseModel):
     graph: Graph
 
 
-# ---------- Responses that depend on the scan's state ----------
-
 class PendingResultsResponse(BaseModel):
-    """Returned by /scans/{id}/results while a scan is not finished yet."""
     scan_id: str
     status: str
     results: Optional[ScanResults] = None
 
 
 class ScanRecord(BaseModel):
-    """One scan as listed by GET /scans."""
     scan_id: str
     target: str
     status: str
     results: Optional[ScanResults] = None
-    # Only present if the scan failed.
     error: Optional[str] = None
