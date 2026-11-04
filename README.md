@@ -89,3 +89,4 @@ Open **http://127.0.0.1:8000/** for the dashboard and **/docs** for the interact
 1. Go to the **Account** page and register. Passwords need at least 12 characters.
 2. Open **Scanner** and run a scan.
 3. Check **Overview** and **Analytics** to see your data.
+<img width="1366" height="730" alt="Screenshot (182)" src="https://github.com/user-attachments/assets/c98dd886-d086-4258-a326-3cd5555f1541" />
